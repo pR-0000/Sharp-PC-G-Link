@@ -1,0 +1,34 @@
+<!doctype html><html lang="fr"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharp PC-G Link</title><style>
+body{background:#edf1f5;color:#23364a;font:17px/1.6 'Segoe UI',sans-serif;margin:0}
+main{max-width:940px;margin:30px auto;background:white;padding:32px 50px;border-radius:12px}
+h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.8em}
+h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
+pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
+pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+</style><main><h1>Développer Sharp PC-G Link</h1>
+<p><a href="DEVELOPMENT_EN.html">English</a> · <a href="README.html">Accueil</a></p>
+<p>Le seul point d’entrée public est <strong>Sharp PC-G Link.pyw</strong>. <code>sharp_link/gui.py</code> possède la fenêtre, les préférences et la liaison série commune ; <code>RomDumpPanel</code> est intégré comme deuxième onglet. Les anciennes interfaces restent disponibles pour les sessions manuelles, via <code>--rom-dump --manual</code> ou <code>--session chemin/session.json</code>.</p>
+<p>Depuis la racine, avec Python 3.10+ :</p>
+<pre><code>
+python -m pip install -r requirements.txt
+
+python -m unittest discover -s tests -v
+
+python tools/render_manual.py
+
+python tools/package_source.py --lang fr
+
+</code></pre>
+<p>Les tests de l’interface utilisent de vrais widgets Tk et des ports simulés. Ils nécessitent une session graphique. Ils ne font aucun transfert vers un appareil connecté et n’utilisent pas les préférences personnelles.</p>
+<p>Pour construire la version Windows autonome et les archives :</p>
+<pre><code>
+python -m pip install -r tools/requirements-build.txt
+
+python tools/build_windows.py
+
+</code></pre>
+<p>Les résultats sont placés dans <code>dist/</code> et dans <code>deliverables/</code> à côté du dépôt. Le build embarque les agents ROM, exemples et guides hors ligne. L’exécutable n’a pas besoin de Python sur la machine de destination. Les archives ne contiennent ni environnement local, ni INI personnel, ni ROM utilisateur.</p>
+<p><code>tools/setup/</code> conserve des scripts console de dépannage pour les associations <code>.pyw</code> défectueuses. <code>tools/legacy/</code> contient les anciens points d’entrée ; ils ne sont pas requis pour un nouvel utilisateur. Le lanceur racine propose lui-même la préparation graphique des dépendances si nécessaire.</p>
+<p>Pour reconstruire ou tester le code Z80, voir <a href="../romdump/AUTOMATIC.html">le guide ROM</a>. Les binaires de l’agent fournis suffisent à l’utilisation normale.</p></main></html>

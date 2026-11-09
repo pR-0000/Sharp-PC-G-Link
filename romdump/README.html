@@ -1,0 +1,28 @@
+<!doctype html><html lang="fr"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharp PC-G Link</title><style>
+body{background:#edf1f5;color:#23364a;font:17px/1.6 'Segoe UI',sans-serif;margin:0}
+main{max-width:940px;margin:30px auto;background:white;padding:32px 50px;border-radius:12px}
+h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.8em}
+h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
+pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
+pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+</style><main><h1>Sauvegarde ROM : ancien mode manuel</h1>
+<p><a href="README_EN.html">English</a> · <a href="../docs/README.html#francais">Accueil</a></p>
+<p>Pour une nouvelle sauvegarde, utiliser l’onglet <strong>Sauvegarde ROM</strong> du lanceur racine : <a href="AUTOMATIC.html">guide automatique</a>. Ce document décrit le mode manuel conservé pour reprendre les sauvegardes au format historique.</p>
+<h2>Préparation</h2>
+<p>Lancer <code>python &quot;Sharp PC-G Link.pyw&quot; --rom-dump --manual</code>. L’interface est FR/EN et utilise le fichier INI de Link. Régler <strong>4800 / 8N1</strong>, <strong>RS/CS</strong>, <strong>CR LF</strong>, <strong>EOF 1A</strong> dans <strong>TEXT → Sio → Format</strong>, puis ENTER. Vérifier ces valeurs en cas d’erreur ou si R revient immédiatement au moniteur.</p>
+<p>Sauvegarder les programmes à conserver : l’agent remplace le programme en RAM. Choisir le modèle, le port et le nombre de sélecteurs de banques. Garder <strong>deux lectures indépendantes par bloc</strong>. Le nombre de sélecteurs ne prouve pas la taille physique de la ROM.</p>
+<h2>Charger et recevoir</h2>
+<ol>
+<li>Cliquer <strong>Nouvelle session</strong> et choisir le dossier parent ; un sous-dossier unique est créé.</li>
+<li>Sur le Sharp : <strong>MON → USER1400 → R</strong>, puis <strong>Envoyer l’agent</strong> côté PC. Sur PC-G820, CALL #5,&amp;HC000 remplace MON.</li>
+<li>Pour chaque bloc, saisir <strong>G100</strong> sur le Sharp, attendre le retour au moniteur, cliquer <strong>Recevoir le bloc</strong>, puis saisir <strong>W300,1400</strong> sur le Sharp.</li>
+<li>Pour la seconde lecture, utiliser <strong>G103</strong>, puis <strong>Recevoir le bloc → W300,1400</strong>. Suivre les commandes affichées jusqu’à la fin.</li>
+</ol>
+<p>G100 avance après la copie ; G103 relit la même source. Une simple retransmission du tampon W ne compte pas comme une lecture indépendante. En cas d’interruption ou de CRC incorrect, refaire <strong>Recevoir le bloc → W300,1400</strong>, sans avancer avec G100.</p>
+<h2>Reprendre et fichiers</h2>
+<p><strong>Reprendre</strong> ouvre <code>session.json</code>, vérifie les empreintes et prépare l’agent au premier bloc manquant. Recharger cet agent avec MON → USER1400 → R et suivre les commandes affichées. Ne pas mélanger des machines ou des révisions de firmware.</p>
+<p><code>base.bin</code> contient les 64 octets de vecteurs RAM ; <code>fixed.bin</code> la fenêtre 8000h–BFFFh ; <code>banks/</code> contient les fenêtres de 16 Ko par sélecteur. <code>report.json</code> décrit empreintes, miroirs et intégrité. <code>chunks/</code>, <code>captures/</code> et <code>session.json</code> servent à la reprise. L’export g800 est conditionnel au profil et à la cohérence du mappage ; les ROM utilisateur ne sont pas distribuées.</p>
+<p>L’agent manuel s’exécute en RAM, sauvegarde et restaure le registre de banque 19h et utilise le moniteur pour le transfert. Aucun appel aux routines série ROM n’est requis. Ce mode conserve ses propres limites de profils : les modèles à sélection 69h nécessitent le parcours automatique.</p>
+<p>Voir <a href="../docs/DEVELOPMENT.html">le guide développeur</a> pour reconstruire les agents et exécuter les vérifications.</p></main></html>

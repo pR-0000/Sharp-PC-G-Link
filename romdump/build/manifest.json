@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "bytes": 544,
+  "origin": "0100",
+  "next": "G100",
+  "reread": "G103",
+  "restart": "G106",
+  "reserve": "USER1400",
+  "export": "W300,1400",
+  "bank_port": "19",
+  "sha256": "043fb53c5c8ac6d1b519b8478997af8ffdbf1674b95c1e81f4de47466cc20dea",
+  "hardware_tested": false,
+  "config_offset": 480,
+  "config_banks_offset": 488,
+  "config_tag_offset": 489,
+  "next_job_offset": 314
+}

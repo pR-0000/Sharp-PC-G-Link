@@ -1,0 +1,66 @@
+<!doctype html><html lang="fr"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharp PC-G Link</title><style>
+body{background:#edf1f5;color:#23364a;font:17px/1.6 'Segoe UI',sans-serif;margin:0}
+main{max-width:940px;margin:30px auto;background:white;padding:32px 50px;border-radius:12px}
+h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.8em}
+h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
+pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
+pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+</style><main><h1>Manuel de transfert</h1>
+<p><a href="TRANSFER_EN.html">English</a> · <a href="README.html#francais">Accueil</a></p>
+<h2>Préparer la liaison</h2>
+<p>Choisir le modèle et le port série. Un adaptateur compatible avec les niveaux électriques et le connecteur Sharp, avec RTS/CTS, est nécessaire. Un port RS-232 classique ne se branche pas directement. Si l’adaptateur FTDI nécessite une inversion TXD/RXD/RTS#/CTS#, elle doit être configurée dans son EEPROM ; le logiciel ne l’effectue pas.</p>
+<p>Les valeurs initiales sont <strong>1200 bauds / 7N1</strong>, RTS/CTS activé, XON/XOFF désactivé, CR LF et EOF 1A. Le délai initial est de <strong>50 ms par ligne</strong>, sans pause supplémentaire entre caractères. Le bouton <strong>Conseillés : 4800 / 8N1</strong> sélectionne le débit et la trame recommandés sans changer le port, le modèle ni les délais. Les champs acceptent 7 ou 8 bits, parité N/E/O et 1 ou 2 bits de stop.</p>
+<p>Sur le Sharp : <strong>TEXT → Sio → Format</strong>, mêmes débit/bits/parité/stop, <strong>RS/CS</strong>, <strong>CR LF</strong>, <strong>EOF 1A</strong>, puis <strong>ENTER</strong>. Pour les listings numérotés, choisir <strong>Line number = Yes</strong> si proposé. L’application ne configure pas le Sharp à distance. <strong>Revérifier ce menu après RESET et en cas d’erreur ou de retour immédiat au moniteur après R.</strong> La sauvegarde ROM exige 4800 / 8N1.</p>
+<p>Les profils couvrent PC-E200, PC-G801/G802/G803/G805/G811/G813/G815/G820/G830/G850/G850S/G850V/G850VS. Le choix du modèle ne garantit pas la compatibilité d’un programme avec sa RAM, son écran ou ses appels ROM. PC-E500, PC-1600 et l’enregistrement cassette ne sont pas pris en charge.</p>
+<h2>Envoyer du BASIC</h2>
+<ol>
+<li>Ouvrir un <code>.bas</code> ou <code>.txt</code> ASCII numéroté, ou choisir un exemple dans <strong>Exemples</strong>.</li>
+<li>Modifier éventuellement le listing dans <strong>Source BASIC</strong>. <strong>Envoyer BASIC transmet le contenu de l’éditeur</strong>, même si les modifications ne sont pas enregistrées. <strong>Enregistrer sous</strong> permet de conserver une copie.</li>
+<li>Sur le Sharp : sauvegarder les données à conserver, préparer une zone TEXT vide si nécessaire, puis <strong>TEXT → Sio → Load</strong>.</li>
+<li>Cliquer <strong>Envoyer BASIC</strong> sur le PC et attendre le retour du Sharp au menu.</li>
+<li>Ouvrir <strong>TEXT → Edit</strong> pour voir le listing, au besoin avec la flèche bas. Le nom du fichier PC n’est pas transmis.</li>
+<li>Convertir par <strong>TEXT → Basic → Basic←text</strong>, puis passer en <strong>BASIC / RUN MODE</strong> et saisir <strong>RUN</strong>.</li>
+</ol>
+<p>La conversion remplace le programme BASIC existant. Le texte reçu n’est pas encore un programme BASIC tokenisé : <strong>RUN ne l’exécute pas avant conversion</strong>. La commande BASIC <code>LOAD</code> seule ne remplace pas le menu <strong>TEXT → Sio → Load</strong>. Les images BASIC tokenisées et les fichiers cassette ne sont pas acceptés.</p>
+<p>Le logiciel vérifie les numéros croissants de 1 à 65279, les doublons, l’ordre et les lignes de plus de 255 caractères. Les accents et contrôles indésirables sont refusés. Les fins de ligne sont normalisées en CR LF, avec un seul marqueur EOF 1A.</p>
+<p>Les exemples inclus proposent un message (<code>01_bonjour.bas</code>), la somme des carrés de 1 à 10, résultat <strong>385</strong> (<code>02_calcul.bas</code>), et un nombre à deviner (<code>03_devine.bas</code>).</p>
+<h2>Envoyer un programme Z80</h2>
+<p><strong>BIN :</strong> saisir l’adresse d’origine utilisée à l’assemblage. Les octets sont convertis automatiquement en Intel HEX. <strong>HEX/IHX :</strong> les adresses proviennent du fichier ; le champ de chargement BIN est désactivé. Checksums, longueurs, recouvrements et limites sont contrôlés. Seuls les enregistrements 00 (données) et 01 (fin) sont acceptés.</p>
+<p>Les adresses sont hexadécimales : <code>0100</code>, <code>0x0100</code> et <code>&amp;H0100</code> sont acceptés. <strong>Changer l’adresse de chargement ne reloge pas le code.</strong> Le champ <strong>Entrée</strong> sert uniquement à afficher la commande <code>G</code> ; il ne lance pas le programme.</p>
+<p>Après sauvegarde du contenu utile : <strong>MON → USERxxxx → R</strong> sur le Sharp, puis <strong>Envoyer ASM</strong> sur le PC. Une fois le transfert terminé, saisir <strong>Gxxxx</strong> avec le point d’entrée documenté. Sur PC-G820, utiliser <strong>CALL #5,&amp;HC000</strong> pour entrer dans le moniteur.</p>
+<p>La suggestion USER couvre le fichier jusqu’à la fin de page ; prévoir aussi la RAM nécessaire aux variables et à la pile du programme. Les adresses acceptées sont 0100–7FFFh, limitées à 0100–17E2h sur les profils 8 Kio G801/G802/G803/G820. Ce contrôle ne mesure pas la RAM libre sur l’appareil. Un source <code>.asm</code> doit être assemblé avant envoi.</p>
+<h3>Exemple autonome inclus</h3>
+<p>Choisir <strong>Signature PC-G801 (.bin)</strong> ou <strong>(.hex)</strong>. Les deux fichiers représentent le même programme de 16 octets, d’origine et d’entrée <strong>0100h</strong>, sans appel ROM ni accès matériel.</p>
+<pre><code>
+MON
+
+USER01FF
+
+R
+
+</code></pre>
+<p>Cliquer <strong>Envoyer ASM</strong>, attendre la fin, puis saisir :</p>
+<pre><code>
+G100
+
+D110
+
+</code></pre>
+<p>La mémoire à 0110h doit commencer par <strong>50 43 47 21</strong>, soit <code>PCG!</code>. Le programme revient au moniteur par RET. Le source est fourni dans <code>examples/assembler/pcg801_signature.asm</code>.</p>
+<h2>Recevoir et enregistrer</h2>
+<p>Dans le panneau <strong>Réception</strong>, cliquer <strong>Recevoir</strong>, attendre l’état de disponibilité, puis lancer <strong>TEXT → Sio → Save</strong> sur le Sharp. Pour le BASIC, convertir d’abord avec <strong>TEXT → Basic → Text←basic</strong>. Pour une zone machine, utiliser <code>Wdébut,fin</code> dans MON ; par exemple <code>W100,113</code> pour l’exemple après exécution.</p>
+<p><strong>Enregistrer la réception</strong> conserve les octets reçus sans le marqueur EOF 1A final. L’aperçu peut remplacer visuellement des caractères non ASCII, mais le fichier conserve les octets originaux. Sans EOF, la réception signale une erreur après 10 secondes d’inactivité ; les données partielles peuvent être enregistrées. Le logiciel ne les sauvegarde pas automatiquement.</p>
+<p>Le journal affiche les paramètres, attentes CTS, erreurs et fins de transfert. <strong>Annuler</strong> interrompt une attente ; utiliser aussi BREAK sur le Sharp si nécessaire. Une émission terminée côté PC n’est pas un acquittement de fichier : vérifier la réception sur le Sharp.</p>
+<h2>Diagnostic et mémoire</h2>
+<p><strong>Contrôler CTS</strong> observe le signal pendant 60 secondes sans écrire d’octet UART ni lire les données reçues. L’ouverture du port active néanmoins RTS/DTR : ce n’est pas une mesure passive de tension. Annuler ferme le port ; arrêter le contrôle avant de transférer. <strong>CTS actif ne prouve pas que Load est lancé.</strong></p>
+<p><strong>I/O DEVICE ERROR ou R revient au moniteur :</strong> vérifier d’abord TEXT → Sio → Format et ENTER, puis le port, RS/CS, le câblage, la masse et les inversions de l’adaptateur. Si l’erreur précède tout envoi, les octets du fichier n’en sont pas la cause. Si le port est occupé, fermer les autres logiciels série. Une attente CTS se termine en erreur après 20 secondes ; vérifier que le Sharp attend dans Load ou R. Si des caractères sont perdus, essayer 1200 bauds des deux côtés et 100 ms par ligne.</p>
+<p><strong>ERROR 10 après LOAD en BASIC :</strong> utiliser TEXT → Sio → Load, puis Basic←text. <strong>MEMORY OVER :</strong> vérifier <code>FRE</code> en BASIC/RUN et la mémoire occupée par BASIC, TEXT, les fichiers et les réservations USER.</p>
+<p><strong>Si FRE annonce une valeur incohérente proche de 64 Ko sur un appareil de 8 Ko : sauvegarder les données, faire RESET et répondre Y à « MEMORY CLEAR O.K. ? ». Cette confirmation efface la mémoire.</strong> Vérifier ensuite FRE et le format SIO. L’application ne lit pas FRE et ne déclenche pas RESET.</p>
+<p>Pour libérer une ancienne réservation assembleur après sauvegarde : <code>MON</code>, puis <code>USER</code> affiche la réservation ; <code>USER00FF</code> la libère. Ne plus exécuter l’ancien code. Cela ne remplace pas un RESET avec effacement lorsque l’état mémoire est incohérent.</p>
+<h2>Préférences et sauvegarde ROM</h2>
+<p>La langue s’applique immédiatement. Langue, modèle, port, débit, trame, délais, adresses et dossier ROM sont enregistrés dans <strong>sharp_pc_g_link.ini</strong>, à côté du lanceur ou de l’exécutable. Les messages déjà inscrits au journal gardent leur langue. Les mises à jour préservent le fichier existant ; le modèle de configuration est <code>sharp_link/defaults.ini</code>.</p>
+<p>L’onglet <strong>Sauvegarde ROM</strong> utilise un agent préassemblé et deux actions : envoyer le dumper, puis recevoir toutes les données après un seul G100. Voir le <a href="../romdump/AUTOMATIC.html">guide ROM</a> pour les limites de compatibilité et les fichiers produits.</p>
+<h2>Références et développement</h2>
+<p><a href="https://github.com/fu-sen/readrom">readrom</a> documente le moniteur et les sauvegardes ; <a href="https://github.com/z88dk/z88dk/wiki/Platform---Sharp-PC">z88dk</a> décrit la famille Sharp. Le <a href="https://github.com/z88dk/z88dk/blob/master/examples/g800/send.py">programme SIO de z88dk</a> fournit une référence pour RTS/CTS et les pauses entre lignes. Voir le <a href="DEVELOPMENT.html">guide développeur</a> pour les tests et la construction.</p></main></html>

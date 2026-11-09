@@ -1,0 +1,21 @@
+Licence MIT — traduction française informative
+Le texte anglais de référence figure dans LICENSE.txt.
+
+Copyright (c) 2026 P.RAIMBAULT
+
+L'autorisation est accordée, gratuitement, à toute personne obtenant une copie
+de ce logiciel et des fichiers de documentation associés (le « Logiciel »),
+d'utiliser le Logiciel sans restriction, notamment de l'utiliser, le copier,
+le modifier, le fusionner, le publier, le distribuer, le sous-licencier et/ou
+d'en vendre des copies, ainsi que d'autoriser les personnes auxquelles le
+Logiciel est fourni à le faire, sous réserve de la condition suivante :
+
+La mention de copyright ci-dessus et la présente autorisation doivent être
+incluses dans toutes les copies ou parties substantielles du Logiciel.
+
+LE LOGICIEL EST FOURNI « EN L'ÉTAT », SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU
+IMPLICITE, NOTAMMENT SANS GARANTIE DE QUALITÉ MARCHANDE, D'ADÉQUATION À UN USAGE
+PARTICULIER OU D'ABSENCE DE CONTREFAÇON. EN AUCUN CAS LES AUTEURS OU TITULAIRES
+DU COPYRIGHT NE POURRONT ÊTRE TENUS RESPONSABLES D'UNE RÉCLAMATION, DE DOMMAGES
+OU D'UNE AUTRE RESPONSABILITÉ, CONTRACTUELLE, DÉLICTUELLE OU AUTRE, RÉSULTANT DU
+LOGICIEL, DE SON UTILISATION OU D'AUTRES OPÉRATIONS IMPLIQUANT LE LOGICIEL.

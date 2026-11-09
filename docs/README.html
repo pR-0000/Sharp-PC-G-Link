@@ -1,0 +1,93 @@
+<!doctype html><html lang="fr"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharp PC-G Link</title><style>
+body{background:#edf1f5;color:#23364a;font:17px/1.6 'Segoe UI',sans-serif;margin:0}
+main{max-width:940px;margin:30px auto;background:white;padding:32px 50px;border-radius:12px}
+h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.8em}
+h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
+pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
+pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+</style><main><h1>Sharp PC-G Link 1.7.1</h1>
+<p><a href="#francais">Français</a> · <a href="#english">English</a></p>
+<a id="francais"></a>
+<h2>Français</h2>
+<p>Transfert de programmes BASIC et assembleur, et sauvegarde des ROM des Sharp PC-E200 / PC-G, dans une même application Windows en français et en anglais. © 2026 P.RAIMBAULT. Licence <a href="../LICENSE.txt">MIT</a> ; <a href="NOTICE.html">provenance</a>.</p>
+<h3>Lancer l’application</h3>
+<p><strong>Version Windows autonome :</strong> extraire toute l’archive, puis ouvrir <strong>Sharp PC-G Link.exe</strong>. Python n’est pas nécessaire.</p>
+<p><strong>Version source / GitHub :</strong> installer Python 3.10 ou supérieur avec Tkinter, extraire tout le dossier, puis double-cliquer sur <strong>Sharp PC-G Link.pyw</strong>, le seul lanceur à la racine. Si pyserial manque, une fenêtre propose de préparer un environnement local <code>.venv</code> et d’installer <code>pyserial==3.5</code>. Internet est nécessaire pour cette préparation seulement. Les lancements suivants réutilisent les dépendances disponibles. Sous Windows, les fichiers <code>.pyw</code> doivent être associés à Python.</p>
+<p>Conserver ensemble le lanceur et les sous-dossiers. Ne pas lancer depuis l’archive ZIP. Le <a href="https://ftdichip.com/drivers/vcp-drivers/">pilote VCP FTDI</a> est nécessaire si le câble n’expose pas encore de port COM. L’application ne programme pas l’inversion des signaux FTDI.</p>
+<p>Il faut un adaptateur série compatible avec le connecteur et les niveaux électriques du Sharp, avec <strong>RTS/CTS</strong>, et un câble USB de données. Un adaptateur RS-232 classique ne se branche pas directement. Extraire le programme dans un dossier accessible en écriture pour enregistrer les préférences.</p>
+<h3>Une fenêtre, deux onglets</h3>
+<ul>
+<li><strong>Transfert de programmes</strong> : boutons distincts <strong>Envoyer BASIC</strong> et <strong>Envoyer ASM</strong>, éditeur BASIC, aperçu mémoire, réception, référence et journal.</li>
+<li><strong>Sauvegarde ROM</strong> : envoi du dumper, puis réception automatique de toutes les banques choisies. Aucune session à préparer. Un seul <code>G100</code> lance le parcours sur le Sharp, avec deux lectures par bloc, CRC, acquittements et contrôle de fin.</li>
+</ul>
+<p>Les réglages série au-dessus des onglets sont communs. Une seule opération série peut être active à la fois. La langue, le modèle, le port, la trame, les temporisations et les adresses sont enregistrés automatiquement dans <code>sharp_pc_g_link.ini</code>, à côté du lanceur ou de l’exécutable. Les réglages existants sont conservés lors des mises à jour.</p>
+<h3>Régler la liaison avant le transfert</h3>
+<p>Au premier lancement : <strong>1200 bauds / 7N1</strong>. Pour accélérer, utiliser <strong>Conseillés : 4800 / 8N1</strong>. Le dumper ROM nécessite <strong>4800 / 8N1</strong>. RTS/CTS est imposé ; XON/XOFF est désactivé.</p>
+<p><strong>Sur le Sharp, ouvrir TEXT → Sio → Format</strong>, sélectionner les mêmes débit, bits de données, parité et bits de stop que sur le PC, puis <strong>valider avec ENTER</strong>. Régler <strong>RS/CS</strong>, <strong>CR LF</strong>, <strong>EOF 1A</strong> et, pour un listing BASIC numéroté, <strong>Line number = Yes</strong> si proposés. L’application ne change pas les réglages du Sharp à distance.</p>
+<p><strong>En cas d’erreur de transfert, d’I/O DEVICE ERROR ou si la commande <code>R</code> revient directement au moniteur : revérifier TEXT → Sio → Format en premier</strong>, notamment après un RESET. Contrôler ensuite le port COM, le câble, le mode RS/CS et l’inversion FTDI. Le retour immédiat de <code>R</code> ne prouve pas une panne de mémoire.</p>
+<h3>Charger un programme</h3>
+<p><strong>BASIC :</strong> choisir un <code>.bas</code> ou un exemple, puis sur le Sharp <strong>TEXT → Sio → Load</strong> et sur le PC <strong>Envoyer BASIC</strong>. Après réception, retrouver le listing dans <strong>TEXT → Edit</strong>, le convertir avec <strong>TEXT → Basic → Basic←text</strong>, puis <strong>BASIC / RUN MODE → RUN</strong>. Le nom de fichier PC n’est pas transmis. Sauvegarder le BASIC existant avant la conversion, qui le remplace.</p>
+<p><strong>Assembleur :</strong> choisir un <code>.bin</code> ou <code>.hex</code> dans le cadre Assembleur. Pour un BIN, respecter son adresse d’assemblage. Sur le Sharp, ouvrir <strong>MON</strong>, réserver la mémoire avec la commande <code>USER</code> indiquée par le programme, puis <strong>R</strong>. Cliquer sur <strong>Envoyer ASM</strong>, attendre la fin et exécuter <code>G</code> suivi de l’adresse d’entrée, par exemple <code>G100</code>. L’application affiche les commandes pour les exemples inclus ; suivre la documentation de chaque programme pour sa réservation. Le PC-G820 utilise un autre accès au moniteur, détaillé dans le manuel.</p>
+<p>Si <code>FRE</code> indique une quantité incohérente proche de 64 Ko sur un G801 de 8 Ko : sauvegarder les données, faire <strong>RESET</strong>, puis répondre <strong>Y</strong> à <strong>MEMORY CLEAR O.K. ?</strong>. Cette confirmation efface la mémoire. Revérifier ensuite <code>FRE</code> et les réglages SIO.</p>
+<h3>Sauvegarder sa ROM</h3>
+<p>Deux actions suffisent ; <strong>aucune session à créer ou à reprendre manuellement</strong>.</p>
+<ol>
+<li>Choisir le modèle et <strong>4800 / 8N1</strong>, également dans <strong>TEXT → Sio → Format</strong> sur le Sharp. Le dossier de destination est mémorisé ; s’il est vide, il est demandé au premier envoi.</li>
+<li>Sauvegarder les programmes à conserver, car le dumper remplace le programme assembleur en RAM. Sur G801 : <strong>MON → USER0AFF → R</strong>. Cliquer <strong>1. Envoyer le dumper</strong> sur le PC.</li>
+<li>Attendre la fin du chargement. Cliquer <strong>2. Recevoir la ROM entière</strong> sur le PC, puis saisir <strong>G100 une seule fois</strong> sur le Sharp.</li>
+<li>Attendre la confirmation de fin. <strong>Ouvrir le dossier</strong> retrouve les images et le rapport de vérification. Chaque sauvegarde terminée reçoit automatiquement son propre sous-dossier daté, sans écraser les précédentes.</li>
+</ol>
+<p>Les deux lectures, CRC, captures de contrôle et informations de reprise restent gérés automatiquement. Après interruption, appuyer sur <strong>BREAK sur le Sharp</strong>, puis renvoyer le dumper et relancer la réception depuis la même fenêtre ; les blocs déjà vérifiés sont conservés. Il n’y a ni commande W ni G103 entre les blocs.</p>
+<p>Le dumper automatique utilise les routines du firmware : son support matériel est établi pour le <strong>PC-G805</strong> ; les autres profils et révisions de ROM nécessitent une vérification. Le nombre de sélecteurs sondés ne prouve pas la taille physique de la ROM. Aucune ROM personnelle n’est incluse dans le projet ni ses archives.</p>
+<h3>Guides et contenu du dépôt</h3>
+<ul>
+<li><a href="TRANSFER.html">Manuel de transfert et dépannage</a> — procédures détaillées, paramètres, réception, diagnostic CTS et exemples.</li>
+<li><a href="../romdump/AUTOMATIC.html">Guide de sauvegarde ROM</a> — modèles, reprise, fichiers et limites.</li>
+<li><code>examples/</code> : exemples BASIC et assembleur ; <code>sharp_link/</code> : application ; <code>romdump/</code> : agent et documentation.</li>
+<li><code>tools/</code> et <code>tests/</code> : maintenance et développement ; <a href="DEVELOPMENT.html">guide développeur</a>.</li>
+</ul>
+<p>Les profils de transfert couvrent PC-E200, PC-G801, G802, G803, G805, G811, G813, G815, G820, G830, G850, G850S, G850V et G850VS. Choisir un modèle ne rend pas tout programme compatible avec sa RAM, son écran ou ses routines ROM.</p>
+<p>---</p>
+<a id="english"></a>
+<h2>English</h2>
+<p><a href="#francais">Français</a></p>
+<p>BASIC and assembly program transfer, plus Sharp PC-E200 / PC-G ROM backup, in one French/English Windows application. © 2026 P.RAIMBAULT. <a href="../LICENSE.txt">MIT license</a>; <a href="NOTICE.html">provenance</a>.</p>
+<h3>Start the application</h3>
+<p><strong>Standalone Windows release:</strong> extract the entire archive and open <strong>Sharp PC-G Link.exe</strong>. Python is not required.</p>
+<p><strong>Source / GitHub release:</strong> install Python 3.10 or newer with Tkinter, extract the entire folder, and double-click <strong>Sharp PC-G Link.pyw</strong>, the only launcher at the root. If pyserial is missing, a setup window offers to create a local <code>.venv</code> and install <code>pyserial==3.5</code>. Internet is needed for this preparation only. Later launches reuse the available dependencies. Windows must associate <code>.pyw</code> files with Python.</p>
+<p>Keep the launcher and its subfolders together. Do not run from inside a ZIP archive. Install the <a href="https://ftdichip.com/drivers/vcp-drivers/">FTDI VCP driver</a> if the cable does not expose a COM port. The application does not program FTDI signal inversion.</p>
+<p>Use a serial adapter matching the Sharp connector and electrical levels, with <strong>RTS/CTS</strong>, and a USB data cable. A standard RS-232 adapter cannot connect directly. Extract the application into a writable folder so it can save preferences.</p>
+<h3>One window, two tabs</h3>
+<ul>
+<li><strong>Program transfer:</strong> separate <strong>Send BASIC</strong> and <strong>Send ASM</strong> buttons, BASIC editor, memory preview, reception, reference and log.</li>
+<li><strong>ROM backup:</strong> send the dumper, then automatically receive all selected banks. No session setup is required. A single <code>G100</code> on Sharp runs the sequence with two reads per block, CRC, acknowledgements and an end marker.</li>
+</ul>
+<p>Serial settings above the tabs are shared. Only one serial operation can run at a time. Language, model, port, framing, delays and addresses are saved automatically in <code>sharp_pc_g_link.ini</code> beside the launcher or executable. Updates preserve existing preferences.</p>
+<h3>Configure the link before transferring</h3>
+<p>First-run defaults: <strong>1200 baud / 7N1</strong>. For faster transfers use <strong>Recommended: 4800 / 8N1</strong>. ROM backup requires <strong>4800 / 8N1</strong>. RTS/CTS is enforced; XON/XOFF is disabled.</p>
+<p><strong>On Sharp, open TEXT → Sio → Format</strong>, select the same baud rate, data bits, parity and stop bits as on the PC, then <strong>confirm with ENTER</strong>. Select <strong>RS/CS</strong>, <strong>CR LF</strong>, <strong>EOF 1A</strong>, and <strong>Line number = Yes</strong> for numbered BASIC listings where available. The application cannot configure Sharp remotely.</p>
+<p><strong>If transfer fails, I/O DEVICE ERROR appears, or <code>R</code> returns immediately to the monitor, check TEXT → Sio → Format first</strong>, especially after RESET. Then check the COM port, cable, RS/CS mode and FTDI inversion. An immediate return from <code>R</code> does not prove a memory fault.</p>
+<h3>Load a program</h3>
+<p><strong>BASIC:</strong> select a <code>.bas</code> or an example. On Sharp choose <strong>TEXT → Sio → Load</strong>, then click <strong>Send BASIC</strong> on the PC. After reception, find the listing in <strong>TEXT → Edit</strong>, convert it using <strong>TEXT → Basic → Basic←text</strong>, then select <strong>BASIC / RUN MODE → RUN</strong>. The PC filename is not sent. Back up any existing BASIC program before conversion, which replaces it.</p>
+<p><strong>Assembly:</strong> select a <code>.bin</code> or <code>.hex</code> in the Assembly section. For BIN files, use the original assembly address. On Sharp, enter <strong>MON</strong>, reserve memory using the program’s documented <code>USER</code> command, then enter <strong>R</strong>. Click <strong>Send ASM</strong>, wait for loading to finish, and run <code>G</code> followed by the entry address, such as <code>G100</code>. The application shows commands for its included examples; follow each program’s documentation for its reservation. PC-G820 uses a different monitor entry, described in the manual.</p>
+<p>If <code>FRE</code> reports an implausible value near 64 KB on an 8 KB G801: back up your data, press <strong>RESET</strong>, and answer <strong>Y</strong> to <strong>MEMORY CLEAR O.K. ?</strong>. This confirmation erases memory. Afterwards check <code>FRE</code> and the SIO settings again.</p>
+<h3>Back up your ROM</h3>
+<p>Two actions are enough; <strong>there is no session to create or resume manually</strong>.</p>
+<ol>
+<li>Choose the model and <strong>4800 / 8N1</strong>, also in Sharp <strong>TEXT → Sio → Format</strong>. The destination folder is remembered; if blank, it is requested on the first upload.</li>
+<li>Back up programs you want to keep: the dumper replaces the assembly program in RAM. On G801 enter <strong>MON → USER0AFF → R</strong>, then click <strong>1. Send dumper</strong> on the PC.</li>
+<li>Wait for loading to finish. Click <strong>2. Receive entire ROM</strong> on the PC, then enter <strong>G100 once</strong> on Sharp.</li>
+<li>Wait for verified completion. Use <strong>Open folder</strong> to find the images and verification report. Each completed backup automatically gets its own dated subfolder, preserving earlier backups.</li>
+</ol>
+<p>Independent reads, CRC, audit captures and recovery information are managed automatically. After interruption, press <strong>BREAK on Sharp</strong>, send the dumper again, and restart reception in the same window; verified blocks are retained. No W or G103 commands are needed between blocks.</p>
+<p>The automatic dumper uses firmware routines: hardware support is established for the <strong>PC-G805</strong>; other profiles and ROM revisions require verification. Probed selectors do not establish physical ROM size. Personal ROMs are excluded from the project and release archives.</p>
+<h3>Guides and repository contents</h3>
+<ul>
+<li><a href="TRANSFER_EN.html">Transfer and troubleshooting manual</a> — detailed procedures, framing, reception, CTS diagnostics and examples.</li>
+<li><a href="../romdump/AUTOMATIC_EN.html">ROM backup guide</a> — models, resuming, outputs and limits.</li>
+<li><code>examples/</code>: BASIC and assembly examples; <code>sharp_link/</code>: application; <code>romdump/</code>: agent and documentation.</li>
+<li><code>tools/</code> and <code>tests/</code>: maintenance and development; <a href="DEVELOPMENT_EN.html">developer guide</a>.</li>
+</ul>
+<p>Transfer profiles cover PC-E200, PC-G801, G802, G803, G805, G811, G813, G815, G820, G830, G850, G850S, G850V and G850VS. Selecting a model does not make every program compatible with its RAM, display or ROM routines.</p></main></html>

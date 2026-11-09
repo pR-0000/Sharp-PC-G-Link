@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharp PC-G Link</title><style>
+body{background:#edf1f5;color:#23364a;font:17px/1.6 'Segoe UI',sans-serif;margin:0}
+main{max-width:940px;margin:30px auto;background:white;padding:32px 50px;border-radius:12px}
+h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.8em}
+h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
+pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
+pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+</style><main><h1>ROM backup: legacy manual mode</h1>
+<p><a href="README.html">Français</a> · <a href="../docs/README.html#english">Home</a></p>
+<p>For a new backup, use the root launcher’s <strong>ROM backup</strong> tab: <a href="AUTOMATIC_EN.html">automatic guide</a>. This document describes the manual mode retained for historical-format backups.</p>
+<h2>Preparation</h2>
+<p>Run <code>python &quot;Sharp PC-G Link.pyw&quot; --rom-dump --manual</code>. The interface supports FR/EN and uses Link’s INI file. Set <strong>4800 / 8N1</strong>, <strong>RS/CS</strong>, <strong>CR LF</strong>, <strong>EOF 1A</strong> in <strong>TEXT → Sio → Format</strong>, then ENTER. Check these values on errors or if R immediately returns to the monitor.</p>
+<p>Back up programs you want to keep: the agent replaces the program in RAM. Select the model, port and bank selector count. Keep <strong>two independent reads per block</strong>. The selector count does not establish physical ROM capacity.</p>
+<h2>Upload and receive</h2>
+<ol>
+<li>Click <strong>New session</strong> and choose the parent directory; a unique subfolder is created.</li>
+<li>On the Sharp: <strong>MON → USER1400 → R</strong>, then <strong>Upload agent</strong> on the PC. On PC-G820, CALL #5,&amp;HC000 replaces MON.</li>
+<li>For each block, enter <strong>G100</strong> on the Sharp, wait for the monitor, click <strong>Receive block</strong>, then enter <strong>W300,1400</strong> on the Sharp.</li>
+<li>For the second read, use <strong>G103</strong>, then <strong>Receive block → W300,1400</strong>. Follow the displayed commands until completion.</li>
+</ol>
+<p>G100 advances after copying; G103 rereads the same source. Retransmitting the W buffer alone does not count as an independent read. On interruption or invalid CRC, repeat <strong>Receive block → W300,1400</strong>, without advancing with G100.</p>
+<h2>Resume and files</h2>
+<p><strong>Resume</strong> opens <code>session.json</code>, checks hashes and prepares the agent at the first incomplete block. Reload it with MON → USER1400 → R and follow the displayed commands. Do not mix machines or firmware revisions.</p>
+<p><code>base.bin</code> holds 64 bytes of RAM vectors; <code>fixed.bin</code> the 8000h–BFFFh window; <code>banks/</code> holds 16 KB windows per selector. <code>report.json</code> describes hashes, mirrors and integrity. <code>chunks/</code>, <code>captures/</code> and <code>session.json</code> support recovery. g800 export depends on the profile and mapping checks; user ROMs are not distributed.</p>
+<p>The manual agent runs in RAM, saves/restores bank register 19h and uses the monitor for transmission. It does not call ROM serial routines. This mode retains its own profile limits: models using bank port 69h require the automatic workflow.</p>
+<p>See the <a href="../docs/DEVELOPMENT_EN.html">developer guide</a> to rebuild agents and run checks.</p></main></html>

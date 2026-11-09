@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharp PC-G Link</title><style>
+body{background:#edf1f5;color:#23364a;font:17px/1.6 'Segoe UI',sans-serif;margin:0}
+main{max-width:940px;margin:30px auto;background:white;padding:32px 50px;border-radius:12px}
+h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.8em}
+h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
+pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
+pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+</style><main><h1>Automatic ROM backup</h1>
+<p><a href="AUTOMATIC.html">Français</a> · <strong>English</strong> · <a href="../docs/README.html#english">Sharp PC-G Link</a></p>
+<p>The workflow is simply <strong>send the dumper, then receive ROM data</strong>. Identifiers, verification files and output folders are prepared automatically.</p>
+<h2>Back up your ROM</h2>
+<p>Two actions are enough; <strong>there is no session to create or resume manually</strong>.</p>
+<ol>
+<li>Choose the model and <strong>4800 / 8N1</strong>, also in Sharp <strong>TEXT → Sio → Format</strong>. The destination folder is remembered; if blank, it is requested on the first upload.</li>
+<li>Back up programs you want to keep: the dumper replaces the assembly program in RAM. On G801 enter <strong>MON → USER0AFF → R</strong>, then click <strong>1. Send dumper</strong> on the PC.</li>
+<li>Wait for loading to finish. Click <strong>2. Receive entire ROM</strong> on the PC, then enter <strong>G100 once</strong> on Sharp.</li>
+<li>Wait for verified completion. Use <strong>Open folder</strong> to find the images and verification report. Each completed backup automatically gets its own dated subfolder, preserving earlier backups.</li>
+</ol>
+<p>Independent reads, CRC, audit captures and recovery information are managed automatically. After interruption, press <strong>BREAK on Sharp</strong>, send the dumper again, and restart reception in the same window; verified blocks are retained. No W or G103 commands are needed between blocks.</p>
+<p>The automatic dumper uses firmware routines: hardware support is established for the <strong>PC-G805</strong>; other profiles and ROM revisions require verification. Probed selectors do not establish physical ROM size. Personal ROMs are excluded from the project and release archives.</p>
+<h2>Settings and errors</h2>
+<p><strong>On transfer errors or R returning immediately to the monitor, check TEXT → Sio → Format first</strong>, especially after RESET. Select <strong>4800 baud, 8 data bits, no parity, 1 stop, RS/CS, CR LF, EOF 1A</strong>, then ENTER, with matching PC settings. The PC cannot configure Sharp remotely. PC-G820 enters the monitor through <strong>CALL #5,&amp;HC000</strong>; instructions adapt to the model.</p>
+<p>The G801 profile defaults to five selectors, including <strong>font bank 04</strong>. Bank/read options apply when sending the dumper; retain two reads. E200/G80X/G81X/G820/G830 profiles use port 19h, G850 profiles port 69h. Native routine compatibility depends on the firmware revision.</p>
+<h2>Files and integrity</h2>
+<p>In the dated subfolder: <code>base.bin</code> contains 64 bytes of RAM vectors, <code>fixed.bin</code> the 8000h–BFFFh window, and <code>banks/</code> the sampled 16 KB windows. <code>report.json</code> records SHA-256 and identical/uniform banks. G801 receives a <code>g800/</code> export when the fixed window matches bank 00 and at least five banks were read.</p>
+<p><code>session.json</code>, <code>chunks/</code> and <code>captures/</code> are verification and recovery details retained automatically. Session describes internal storage, not a step users must perform. Do not alter these files during reception. Earlier completed backups are preserved.</p>
+<p>Each 544-byte frame carries an identifier, address, bank, read number and CRC-16/CCITT-FALSE. The PC saves before ACK; a failed CRC requests retransmission, up to five attempts. Two matching reads and a valid END marker are required for success. Retransmitting a packet does not count as a new independent read.</p>
+<h2>Development and older backups</h2>
+<p><a href="rom_stream.asm">rom_stream.asm</a> contains the original 678-byte agent. It uses native BCE8h/BCEBh/BFAFh/BCE2h routines and restores the bank before each call. No LCD port or RAM-bank selector is modified. <code>sharp_link/romstream.py</code> implements the protocol; <code>sharp_link/romstream_gui.py</code> the interface.</p>
+<pre><code>
+python romdump/build_agent.py --assembler &quot;path/to/sjasmplus.exe&quot;
+
+python -m unittest discover -s tests -v
+
+python romdump/check_stream.py --rom-dir &quot;path/to/ROM-backup&quot;
+
+</code></pre>
+<p>Advanced users can reopen an existing backup after closing the application: <code>python &quot;Sharp PC-G Link.pyw&quot; --rom-dump --session &quot;path/session.json&quot;</code>. Older manual backups open their historical interface. For a new backup, simply use the ROM backup tab.</p>
+<p>Bank ports are cross-checked with <a href="https://github.com/mamedev/mame/blob/master/src/mame/sharp/pce220.cpp">MAME</a> and <a href="https://ver0.sakura.ne.jp/pc/g800src.0.11.4.tgz">g800</a>. Serial calls target PC-G805 firmware; no ROM is distributed.</p></main></html>

@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "origin": "0100",
+  "reserve": "USER0AFF",
+  "run": "G100",
+  "bytes": 678,
+  "sha256": "0f3f0fb3278a75570b03074754597991ce872ff3ce7c691cc4dbc8e2979a8208",
+  "hardware_tested": true,
+  "native_serial_entries": [
+    "BCE8",
+    "BCEB",
+    "BFAF",
+    "BCE2"
+  ],
+  "offsets": {
+    "config_magic": 649,
+    "config_banks": 657,
+    "config_port": 658,
+    "config_reads": 659,
+    "config_start": 660,
+    "config_tag": 662
+  },
+  "hardware_tested_models": [
+    "PC-G805"
+  ],
+  "hardware_validation_scope": "PC-G805 only; compatibility depends on firmware revision."
+}
