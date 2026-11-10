@@ -14,6 +14,23 @@ from sharp_link.transport import TransferError
 
 
 class GuiTests(unittest.TestCase):
+    def test_expanded_ram_toggle_revalidates_asm_and_saves_preference(self):
+        path=Path(self.temp.name)/'large.bin';path.write_bytes(bytes([0xC9])*0x6B00)
+        with patch.object(self.app,'show_error') as error:
+            self.assertFalse(self.app.load_asm(path))
+            error.assert_called_once()
+        self.assertIsNone(self.app.asm_program)
+        self.app.expanded_ram.set(True)
+        self.assertTrue(self.app.load_asm(path))
+        self.app.update()
+        self.assertIsNotNone(self.app.asm_program)
+        self.assertIn('USER6BFF',self.app.asm_hint.get())
+        self.app.save_config()
+        self.assertEqual(load_settings(self.ini)['expanded_ram'],'yes')
+        self.app.expanded_ram.set(False)
+        self.app.update()
+        self.assertIsNone(self.app.asm_program)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.ini = Path(self.temp.name) / "sharp_pc_g_link.ini"
@@ -105,6 +122,29 @@ class GuiTests(unittest.TestCase):
             self.assertIn("USER01FF", self.app.asm_hint.get())
         self.assertEqual(self.app.asm_program.kind, "hex")
         self.assertEqual(str(self.app.load_address_entry.cget("state")), "disabled")
+
+    def test_g850_examples_follow_model_and_language_and_load_real_menu_paths(self):
+        self.assertEqual(self.app.basic_examples_menu.index('end'), 2)
+        for model in ('PC-G850', 'PC-G850S', 'PC-G850V', 'PC-G850VS'):
+            self.app.model.set(model)
+            self.assertEqual(self.app.basic_examples_menu.index('end'), 8)
+            self.assertEqual(self.app.asm_examples_menu.index('end'), 6)
+        self.app.basic_examples_menu.invoke(4)
+        self.assertIn('BONJOUR DU PC', self.app.editor.get('1.0','end'))
+        self.app.set_language('en')
+        self.assertIn('six rows', self.app.basic_examples_menu.entrycget(4, 'label'))
+        self.app.basic_examples_menu.invoke(4)
+        self.assertIn('HELLO FROM THE PC', self.app.editor.get('1.0','end'))
+        for index in range(4, 9):
+            self.app.basic_examples_menu.invoke(index)
+            self.assertIsNotNone(self.app.basic_program)
+            self.assertIn('/en/', self.app.basic_path.as_posix())
+        self.app.asm_examples_menu.invoke(6)
+        self.assertIn('USER02FF', self.app.asm_hint.get())
+        self.assertEqual(self.app.asm_program.data_bytes, 400)
+        self.app.model.set('PC-G801')
+        self.assertEqual(self.app.basic_examples_menu.index('end'), 2)
+        self.assertEqual(self.app.asm_examples_menu.index('end'), 1)
 
     def test_bin_relocation_updates_wire_and_preview(self):
         self.app.load_asm_example(resources() / "examples/assembler/pcg801_signature.bin")

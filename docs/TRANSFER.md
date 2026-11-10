@@ -35,7 +35,9 @@ Les adresses sont hexadécimales : `0100`, `0x0100` et `&H0100` sont acceptés. 
 
 Après sauvegarde du contenu utile : **MON → USERxxxx → R** sur le Sharp, puis **Envoyer ASM** sur le PC. Une fois le transfert terminé, saisir **Gxxxx** avec le point d’entrée documenté. Sur PC-G820, utiliser **CALL #5,&HC000** pour entrer dans le moniteur.
 
-La suggestion USER couvre le fichier jusqu’à la fin de page ; prévoir aussi la RAM nécessaire aux variables et à la pile du programme. Les adresses acceptées sont 0100–7FFFh, limitées à 0100–17E2h sur les profils 8 Kio G801/G802/G803/G820. Ce contrôle ne mesure pas la RAM libre sur l’appareil. Un source `.asm` doit être assemblé avant envoi.
+La suggestion USER couvre le fichier jusqu’à la fin de page, dans la limite du profil choisi ; prévoir aussi la RAM nécessaire aux variables et à la pile du programme. La plage générale est 0100–7FFFh, limitée à 0100–17E2h sur les profils 8 Kio G801/G802/G803/G820 et à **0100–76E2h sur G850/G850S/G850V/G850VS**. Ces derniers disposent d’environ **30 179 octets utilisateur** à vide : les 32 Kio physiques ne sont pas entièrement disponibles pour USER. Voir la [documentation G850V(S), chapitre 10 et annexes D/I](https://pockemul.com/wp-content/uploads/2020/05/PC-G850VSEng_V3_0.pdf). Ce contrôle ne mesure pas la RAM libre sur l’appareil. Un source `.asm` doit être assemblé avant envoi.
+
+**MEMORY ERROR après USER :** vérifier la taille requise et la place disponible avec `FRE`. Si `USER` affiche déjà « NOT RESERVED » et que la mémoire est libre, une réservation trop grande exige un programme plus petit. Ne pas réduire simplement la réservation puis charger un fichier qui la dépasse.
 
 ### Exemple autonome inclus
 

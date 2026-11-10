@@ -27,3 +27,12 @@ Les résultats sont placés dans `dist/` et dans `deliverables/` à côté du d�
 `tools/setup/` conserve des scripts console de dépannage pour les associations `.pyw` défectueuses. `tools/legacy/` contient les anciens points d’entrée ; ils ne sont pas requis pour un nouvel utilisateur. Le lanceur racine propose lui-même la préparation graphique des dépendances si nécessaire.
 
 Pour reconstruire ou tester le code Z80, voir [le guide ROM](../romdump/AUTOMATIC.md). Les binaires de l’agent fournis suffisent à l’utilisation normale.
+
+Les [exemples PC-G850](../examples/pc-g850/README.md#francais) sont préassemblés. Pour reconstruire leurs deux programmes Z80 et les vérifier avec `z80==1.2.0` :
+
+```text
+python tools/build_g850_examples.py --assembler "chemin/vers/sjasmplus.exe" --lang fr
+python tests/check_g850_examples.py --lang fr
+```
+
+Les vérifications contrôlent les retours, les écritures dans la réservation USER et les six bandes graphiques, avec des IOCS simulés. Elles ne nécessitent aucune ROM Sharp.

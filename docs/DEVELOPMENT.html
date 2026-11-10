@@ -7,6 +7,7 @@ h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.
 h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
 pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
 pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+table{border-collapse:collapse;width:100%;font-size:.92em}th,td{border:1px solid #d6dfe6;padding:8px 10px;text-align:left;vertical-align:top}th{background:#edf1f5}
 </style><main><h1>Développer Sharp PC-G Link</h1>
 <p><a href="DEVELOPMENT_EN.html">English</a> · <a href="README.html">Accueil</a></p>
 <p>Le seul point d’entrée public est <strong>Sharp PC-G Link.pyw</strong>. <code>sharp_link/gui.py</code> possède la fenêtre, les préférences et la liaison série commune ; <code>RomDumpPanel</code> est intégré comme deuxième onglet. Les anciennes interfaces restent disponibles pour les sessions manuelles, via <code>--rom-dump --manual</code> ou <code>--session chemin/session.json</code>.</p>
@@ -31,4 +32,12 @@ python tools/build_windows.py
 </code></pre>
 <p>Les résultats sont placés dans <code>dist/</code> et dans <code>deliverables/</code> à côté du dépôt. Le build embarque les agents ROM, exemples et guides hors ligne. L’exécutable n’a pas besoin de Python sur la machine de destination. Les archives ne contiennent ni environnement local, ni INI personnel, ni ROM utilisateur.</p>
 <p><code>tools/setup/</code> conserve des scripts console de dépannage pour les associations <code>.pyw</code> défectueuses. <code>tools/legacy/</code> contient les anciens points d’entrée ; ils ne sont pas requis pour un nouvel utilisateur. Le lanceur racine propose lui-même la préparation graphique des dépendances si nécessaire.</p>
-<p>Pour reconstruire ou tester le code Z80, voir <a href="../romdump/AUTOMATIC.html">le guide ROM</a>. Les binaires de l’agent fournis suffisent à l’utilisation normale.</p></main></html>
+<p>Pour reconstruire ou tester le code Z80, voir <a href="../romdump/AUTOMATIC.html">le guide ROM</a>. Les binaires de l’agent fournis suffisent à l’utilisation normale.</p>
+<p>Les <a href="../examples/pc-g850/README.html#francais">exemples PC-G850</a> sont préassemblés. Pour reconstruire leurs deux programmes Z80 et les vérifier avec <code>z80==1.2.0</code> :</p>
+<pre><code>
+python tools/build_g850_examples.py --assembler &quot;chemin/vers/sjasmplus.exe&quot; --lang fr
+
+python tests/check_g850_examples.py --lang fr
+
+</code></pre>
+<p>Les vérifications contrôlent les retours, les écritures dans la réservation USER et les six bandes graphiques, avec des IOCS simulés. Elles ne nécessitent aucune ROM Sharp.</p></main></html>

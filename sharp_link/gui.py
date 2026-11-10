@@ -32,6 +32,19 @@ ASM_EXAMPLES = {
     "example_bin": "assembler/pcg801_signature.bin",
     "example_hex": "assembler/pcg801_signature.hex",
 }
+G850_BASIC_EXAMPLES = {
+    "g850_hello": "pc-g850/basic/{lang}/01_transfer.bas",
+    "g850_lcd": "pc-g850/basic/{lang}/02_lcd.bas",
+    "g850_keyboard": "pc-g850/basic/{lang}/03_keyboard.bas",
+    "g850_calculation": "pc-g850/basic/{lang}/04_calculation.bas",
+    "g850_animation": "pc-g850/basic/{lang}/05_animation.bas",
+}
+G850_ASM_EXAMPLES = {
+    "g850_signature_bin": "pc-g850/assembler/g850_signature.bin",
+    "g850_signature_hex": "pc-g850/assembler/g850_signature.hex",
+    "g850_lcd_bin": "pc-g850/assembler/g850_lcd.bin",
+    "g850_lcd_hex": "pc-g850/assembler/g850_lcd.hex",
+}
 
 
 def resources() -> Path:
@@ -78,6 +91,7 @@ class LinkApp(tk.Tk):
 
         self.language_display = tk.StringVar(value=LANGUAGES[self.language])
         self.model = tk.StringVar(value=self.saved["model"] if self.saved["model"] in MODELS else "PC-G801")
+        self.expanded_ram = tk.BooleanVar(value=self.saved["expanded_ram"] == "yes")
         self.port = tk.StringVar()
         self.baud = tk.StringVar(value=self.saved["baud"])
         self.data_bits = tk.StringVar(value=self.saved["data_bits"])
@@ -102,7 +116,7 @@ class LinkApp(tk.Tk):
         self.localize()
         self.refresh_ports(initial=True)
         self.append_log(msg("log_start", version=__version__, path=str(self.settings_file)))
-        for variable in (self.model, self.port, self.baud, self.data_bits, self.parity, self.stop_bits, self.line_delay,
+        for variable in (self.model, self.expanded_ram, self.port, self.baud, self.data_bits, self.parity, self.stop_bits, self.line_delay,
                          self.char_delay, self.load_address, self.entry_address):
             variable.trace_add("write", self.settings_changed)
         self.poll_after_id = self.after(75, self.poll_events)
@@ -231,6 +245,8 @@ class LinkApp(tk.Tk):
         self.label(row, "load_address").pack(side="left")
         self.load_address_entry = self.managed(ttk.Entry(row, textvariable=self.load_address, width=8))
         self.load_address_entry.pack(side="left", padx=(5, 15))
+        self.expanded_ram_box = self.managed(self.caption(ttk.Checkbutton(row, variable=self.expanded_ram), "expanded_ram"))
+        self.expanded_ram_box.pack(side="right", padx=(12, 0))
         self.label(row, "entry_address").pack(side="left")
         self.managed(ttk.Entry(row, textvariable=self.entry_address, width=8)).pack(side="left", padx=(5, 16))
         ttk.Label(row, textvariable=self.asm_info).pack(side="left", fill="x", expand=True)
@@ -312,11 +328,7 @@ class LinkApp(tk.Tk):
         for frame, key in ((self.basic_tab, "basic_tab"), (self.asm_tab, "asm_tab"),
                            (self.receive_tab, "receive_tab"), (self.help_tab, "help_tab")):
             self.tabs.tab(frame, text=self.t(key))
-        for menu, examples, loader in ((self.basic_examples_menu, BASIC_EXAMPLES, self.load_basic),
-                                        (self.asm_examples_menu, ASM_EXAMPLES, self.load_asm_example)):
-            menu.delete(0, "end")
-            for key, relative in examples.items():
-                menu.add_command(label=self.t(key), command=lambda path=relative, load=loader: load(resources() / "examples" / path))
+        self.update_example_menus()
         self.language_display.set(LANGUAGES[self.language])
         self.update_serial_hint()
         self.set_text(self.help_text, REFERENCE[self.language])
@@ -364,12 +376,31 @@ class LinkApp(tk.Tk):
             self.set_status(msg("ports_error", detail=str(error)))
 
     def settings_changed(self, *_):
+        self.update_example_menus()
         self.update_serial_hint()
         self.validate_basic()
         self.validate_asm()
         if self.pending_config:
             self.after_cancel(self.pending_config)
         self.pending_config = self.after(400, self.save_config)
+
+    def update_example_menus(self):
+        key = (self.language, self.model.get().startswith("PC-G850"))
+        if getattr(self, "_example_menu_key", None) == key:
+            return
+        self._example_menu_key = key
+        for menu, common, specific, loader in (
+            (self.basic_examples_menu, BASIC_EXAMPLES, G850_BASIC_EXAMPLES, self.load_basic),
+            (self.asm_examples_menu, ASM_EXAMPLES, G850_ASM_EXAMPLES, self.load_asm_example),
+        ):
+            menu.delete(0, "end")
+            for key, relative in common.items():
+                menu.add_command(label=self.t(key), command=lambda path=relative, load=loader: load(resources() / "examples" / path))
+            if self.model.get().startswith("PC-G850"):
+                menu.add_separator()
+                for key, relative in specific.items():
+                    path = relative.format(lang=self.language)
+                    menu.add_command(label=self.t(key), command=lambda path=path, load=loader: load(resources() / "examples" / path))
 
     def update_serial_hint(self):
         key = "serial_hint_g801" if self.model.get() == "PC-G801" else "serial_hint"
@@ -392,6 +423,7 @@ class LinkApp(tk.Tk):
         values = dict(self.saved)
         values['rom_directory'] = self.rom_panel.destination.get()
         values.update(language=self.language, model=self.model.get(), port=self.port_lookup.get(self.port.get(), ""))
+        values["expanded_ram"] = "yes" if self.expanded_ram.get() else "no"
         if self.baud.get() in {"300", "600", "1200", "2400", "4800", "9600"}:
             values["baud"] = self.baud.get()
         for key, variable, choices in (("data_bits", self.data_bits, ("7", "8")),
@@ -480,7 +512,7 @@ class LinkApp(tk.Tk):
     def choose_asm(self):
         if self.is_busy():
             return
-        path = filedialog.askopenfilename(parent=self, title=self.t("choose_asm"), filetypes=[(self.t("asm_files"), "*.bin *.hex *.ihx"), (self.t("all_files"), "*.*")])
+        path = filedialog.askopenfilename(parent=self, title=self.t("choose_asm"), filetypes=[(self.t("asm_files"), "*.ihx *.hex *.bin"), (self.t("all_files"), "*.*")])
         if path:
             self.load_asm(Path(path))
 
@@ -511,12 +543,12 @@ class LinkApp(tk.Tk):
 
     def prepare_asm(self, path, data):
         if path.suffix.lower() == ".bin":
-            return prepare_binary(data, parse_address(self.load_address.get()), path.name, self.model.get(), self.language)
+            return prepare_binary(data, parse_address(self.load_address.get()), path.name, self.model.get(), self.language, self.expanded_ram.get())
         try:
             text = data.decode("utf-8-sig")
         except UnicodeDecodeError:
             raise FormatError("not_text") from None
-        return prepare(text, path.name, "hex", self.model.get(), self.language)
+        return prepare(text, path.name, "hex", self.model.get(), self.language, self.expanded_ram.get())
 
     def validate_asm(self):
         self.asm_program = None
@@ -530,7 +562,7 @@ class LinkApp(tk.Tk):
                 entry = parse_address(self.entry_address.get())
                 self.asm_program = program
                 self.asm_info.set(self.t("asm_summary", kind=self.t("binary_kind" if program.kind == "binary" else "hex_kind"), count=program.data_bytes, start=program.start, end=program.end, size=program.size))
-                reserve = min(program.reserve_end, 0x17E2) if self.model.get() in SMALL_RAM_MODELS else program.reserve_end
+                reserve = program.reserve_end
                 self.asm_hint.set(self.t("asm_hint", mon="CALL #5,&HC000" if self.model.get() == "PC-G820" else "MON", reserve=reserve, entry=entry))
                 prefix = self.t("binary_preview", name=program.name, count=program.data_bytes, start=program.start, end=program.end)
                 self.set_text(self.asm_preview, prefix + program.preview)

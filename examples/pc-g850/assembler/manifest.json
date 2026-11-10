@@ -1,0 +1,28 @@
+{
+  "origin": "0100",
+  "entry": "0100",
+  "models": [
+    "PC-G850",
+    "PC-G850S",
+    "PC-G850V",
+    "PC-G850VS"
+  ],
+  "programs": {
+    "g850_signature": {
+      "bytes": 16,
+      "last_address": "010F",
+      "user_command": "USER01FF",
+      "run_command": "G100",
+      "sha256_bin": "c430216ceab60b7ffcd51506aa6ae6dd5ccab1c7d1a53e5074bcd618f9d6da3d",
+      "sha256_hex": "7e3c0b95610da8fdce3018548717a7622a2cbabd7548e7f696d5fcad2f33059b"
+    },
+    "g850_lcd": {
+      "bytes": 400,
+      "last_address": "028F",
+      "user_command": "USER02FF",
+      "run_command": "G100",
+      "sha256_bin": "7e1e95ec5720836aa39b3e33cd206c122fe3cc7232c9738c6f25a2b7f72e10b5",
+      "sha256_hex": "0f09d9b4570db2fb408e3c8cd46a17517a2e957373ad262fd6040b486e6a55e3"
+    }
+  }
+}

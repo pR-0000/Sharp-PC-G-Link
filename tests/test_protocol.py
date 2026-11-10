@@ -7,6 +7,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_g801_expanded_ram_is_explicit_and_keeps_firmware_limit(self):
+        data=bytes([0xC9])*0x6B00
+        with self.assertRaises(FormatError):prepare_binary(data,0x100,model='PC-G801')
+        program=prepare_binary(data,0x100,model='PC-G801',expanded_ram=True)
+        self.assertEqual(program.reserve_end,0x6BFF)
+        self.assertIn('USER6BFF',instructions(program,'PC-G801'))
+        equivalent=prepare(program.preview if program.kind=='hex' else '\n'.join(line.decode().strip() for line in program.lines),
+                           'large.hex','hex','PC-G801',expanded_ram=True)
+        self.assertEqual(equivalent.end,program.end)
+        for address in (0x77E3,0x7FFF):
+            with self.assertRaises(FormatError):prepare_binary(b'\xC9',address,expanded_ram=True)
+        for model in ('PC-G850','PC-G850V'):
+            with self.assertRaises(FormatError):prepare_binary(b'\xC9',0x76E3,model=model,expanded_ram=True)
+
     def test_binary_roundtrip_preserves_every_byte_including_control_values(self):
         data = bytes(range(256))
         program = prepare_binary(data, 0x100)
@@ -27,6 +41,25 @@ class ProtocolTests(unittest.TestCase):
         for value in ("", "10000", "-100", "0x", "xyz"):
             with self.assertRaises(FormatError):
                 parse_address(value)
+
+    def test_g850_rejects_programs_that_overlap_firmware_workspace(self):
+        for model in ("PC-G850", "PC-G850S", "PC-G850V", "PC-G850VS"):
+            for address in (0x76E3, 0x77FF, 0x7FFF):
+                with self.subTest(model=model, address=address):
+                    with self.assertRaises(FormatError) as caught:
+                        prepare_binary(b"\xC9", address, model=model)
+                    self.assertIn("76E2", caught.exception.render("fr"))
+                    self.assertIn("76E2", caught.exception.render("en"))
+                    with self.assertRaises(FormatError):
+                        prepare(intel_record(address, b"\xC9") + "\n:00000001FF",
+                                "ret.hex", model=model)
+
+    def test_g850_reservation_never_rounds_into_system_memory(self):
+        for address, reservation in ((0x6CFF, 0x6CFF), (0x7600, 0x76E2), (0x76E2, 0x76E2)):
+            with self.subTest(address=address):
+                program = prepare_binary(b"\xC9", address, model="PC-G850")
+                self.assertEqual(program.reserve_end, reservation)
+                self.assertIn(f"USER{reservation:04X}", instructions(program, "PC-G850"))
 
     def test_errors_can_be_rendered_in_both_languages(self):
         with self.assertRaises(FormatError) as caught:
@@ -83,11 +116,12 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(program.kind, "text")
         self.assertIn("assemblé", instructions(program, "PC-G801"))
 
-    def test_every_shipped_example_is_valid_for_g801(self):
+    def test_every_shipped_example_format_is_valid_for_its_target(self):
         for path in (ROOT / "examples").rglob("*"):
             if path.suffix in {".bas", ".hex"}:
                 with self.subTest(path=path.name):
-                    program = prepare(read_source(path), path.name)
+                    model = "PC-G850" if "pc-g850" in path.parts else "PC-G801"
+                    program = prepare(read_source(path), path.name, model=model)
                     self.assertGreater(program.size, 0)
                     self.assertTrue(program.wire.endswith(b"\r\n\x1a"))
 

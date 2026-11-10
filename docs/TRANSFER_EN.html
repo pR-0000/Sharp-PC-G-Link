@@ -7,6 +7,7 @@ h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.
 h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
 pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
 pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+table{border-collapse:collapse;width:100%;font-size:.92em}th,td{border:1px solid #d6dfe6;padding:8px 10px;text-align:left;vertical-align:top}th{background:#edf1f5}
 </style><main><h1>Transfer manual</h1>
 <p><a href="TRANSFER.html">Français</a> · <a href="README.html#english">Home</a></p>
 <h2>Prepare the connection</h2>
@@ -30,7 +31,8 @@ pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){mai
 <p><strong>BIN:</strong> enter the origin address used during assembly. Bytes are converted automatically to Intel HEX. <strong>HEX/IHX:</strong> addresses come from the file; the BIN load address field is disabled. Checksums, lengths, overlaps and address limits are checked. Only records 00 (data) and 01 (end) are accepted.</p>
 <p>Addresses are hexadecimal: <code>0100</code>, <code>0x0100</code> and <code>&amp;H0100</code> are accepted. <strong>Changing the load address does not relocate the code.</strong> The <strong>Entry point</strong> field only displays the <code>G</code> command; it does not launch the program.</p>
 <p>After backing up useful data: <strong>MON → USERxxxx → R</strong> on the Sharp, then <strong>Send ASM</strong> on the PC. Once loading finishes, enter <strong>Gxxxx</strong> with the documented entry point. On PC-G820, use <strong>CALL #5,&amp;HC000</strong> to enter the monitor.</p>
-<p>The USER suggestion covers the file through the end of its page; also allow RAM for variables and the stack. Accepted addresses are 0100–7FFFh, limited to 0100–17E2h for 8 KiB G801/G802/G803/G820 profiles. This check does not measure free RAM on the device. Assemble <code>.asm</code> sources before sending them.</p>
+<p>The USER suggestion covers the file through the end of its page, within the selected profile&#x27;s limit; also allow RAM for variables and the stack. The general range is 0100–7FFFh, limited to 0100–17E2h for 8 KiB G801/G802/G803/G820 profiles and to <strong>0100–76E2h on G850/G850S/G850V/G850VS</strong>. These models provide about <strong>30,179 user bytes</strong> with an empty user area: not all 32 KiB of physical RAM is available to USER. See the <a href="https://pockemul.com/wp-content/uploads/2020/05/PC-G850VSEng_V3_0.pdf">G850V(S) documentation, chapter 10 and appendices D/I</a>. This check does not measure free RAM on the device. Assemble <code>.asm</code> sources before sending them.</p>
+<p><strong>MEMORY ERROR after USER:</strong> check the required size and available space with <code>FRE</code>. If <code>USER</code> already reports “NOT RESERVED” and memory is free, an oversized reservation requires a smaller program. Do not simply reduce the reservation and then load a file that exceeds it.</p>
 <h3>Included standalone example</h3>
 <p>Select <strong>PC-G801 signature (.bin)</strong> or <strong>(.hex)</strong>. Both represent the same 16-byte program, origin and entry <strong>0100h</strong>, without ROM calls or hardware access.</p>
 <pre><code>

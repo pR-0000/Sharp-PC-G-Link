@@ -6,14 +6,14 @@ from pathlib import Path
 import sys
 
 DEFAULTS = {
-    "language": "fr", "model": "PC-G801", "port": "", "baud": "1200",
+    "language": "fr", "model": "PC-G801", "expanded_ram": "no", "port": "", "baud": "1200",
     "data_bits": "7", "parity": "N", "stop_bits": "1",
     "line_delay_ms": "50", "char_delay_ms": "0", "load_address": "0100", "entry_address": "0100", "rom_directory": "",
 }
 SECTIONS = {
     "interface": ("language", "model"),
     "serial": ("port", "baud", "data_bits", "parity", "stop_bits", "line_delay_ms", "char_delay_ms"),
-    "assembler": ("load_address", "entry_address"),
+    "assembler": ("load_address", "entry_address", "expanded_ram"),
     "rom": ("rom_directory",),
 }
 
@@ -51,6 +51,7 @@ def load_settings(path: Path, legacy: Path | None = None) -> dict[str, str]:
             pass
     if values["language"] not in ("fr", "en"):
         values["language"] = "fr"
+    values["expanded_ram"] = "yes" if values["expanded_ram"].strip().lower() in ("yes", "true", "1", "on") else "no"
     # Older INIs have no framing keys; malformed values must not discard other preferences.
     values["parity"] = values["parity"].strip().upper()
     values["parity"] = {"NONE": "N", "EVEN": "E", "ODD": "O"}.get(values["parity"], values["parity"])

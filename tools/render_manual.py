@@ -17,14 +17,32 @@ def inline(text):
 
 def render(root: Path, language="fr", stem=None, output=None, outputs=None):
     stem = stem or "README"
-    blocks, paragraph = [], []
+    blocks, paragraph, table_rows = [], [], []
     in_code = False
     listing = None
     def flush():
         if paragraph:
             blocks.append("<p>" + inline(" ".join(paragraph)) + "</p>")
             paragraph.clear()
+    def flush_table():
+        if table_rows:
+            blocks.append('<table>')
+            for index, cells in enumerate(table_rows):
+                tag = 'th' if index == 0 else 'td'
+                blocks.append('<tr>' + ''.join(f'<{tag}>{inline(cell)}</{tag}>' for cell in cells) + '</tr>')
+            blocks.append('</table>')
+            table_rows.clear()
     for line in (root / f"{stem}.md").read_text(encoding="utf-8").splitlines():
+        if not in_code and line.strip().startswith('|'):
+            flush()
+            if listing:
+                blocks.append(f'</{listing}>')
+                listing = None
+            cells = [cell.strip() for cell in line.strip().strip('|').split('|')]
+            if not all(re.fullmatch(r':?-{3,}:?', cell) for cell in cells):
+                table_rows.append(cells)
+            continue
+        flush_table()
         if line.startswith("```"):
             flush()
             if listing:
@@ -62,6 +80,7 @@ def render(root: Path, language="fr", stem=None, output=None, outputs=None):
             else:
                 paragraph.append(line)
     flush()
+    flush_table()
     if listing:
         blocks.append(f"</{listing}>")
     html = """<!doctype html><html lang="LANGUAGE"><meta charset="utf-8">
@@ -73,6 +92,7 @@ h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.
 h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
 pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
 pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+table{border-collapse:collapse;width:100%;font-size:.92em}th,td{border:1px solid #d6dfe6;padding:8px 10px;text-align:left;vertical-align:top}th{background:#edf1f5}
 </style><main>""".replace('lang="LANGUAGE"', f'lang="{language}"') + "\n".join(blocks) + "</main></html>"
     target = output or root / f"{stem}.html"
     if outputs is not None:
@@ -93,6 +113,7 @@ def render_all(root):
     sources = [root / 'README.md', root / 'NOTICE.md']
     sources.extend((root / 'docs').glob('*.md'))
     sources.extend((root / 'romdump').glob('*.md'))
+    sources.extend((root / 'examples').rglob('*.md'))
     outputs = {source.resolve(): ((root / 'docs' / source.name).with_suffix('.html')
                if source.parent == root else source.with_suffix('.html')) for source in sources}
     for source, destination in outputs.items():

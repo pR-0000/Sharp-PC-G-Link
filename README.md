@@ -1,4 +1,4 @@
-# Sharp PC-G Link 1.7.1
+# Sharp PC-G Link 1.8.1
 
 [Français](#francais) · [English](#english)
 
@@ -37,9 +37,11 @@ Au premier lancement : **1200 bauds / 7N1**. Pour accélérer, utiliser **Consei
 
 ### Charger un programme
 
+**G801 avec extension RAM 32 Ko :** cocher **Extension RAM 32 Ko (G80X)** dans les réglages assembleur. Cette préférence est enregistrée dans le fichier INI. Elle autorise les programmes dépassant les 8 Ko du modèle d’origine, avec une limite USER de 77E2h ; elle ne modifie pas la mémoire du Sharp. Vérifier que l’extension physique est reconnue par le firmware et que `FRE` suffit pour le programme. Laisser la case décochée sur un G801 sans extension. Le modèle sélectionné reste inchangé pour la sauvegarde ROM.
+
 **BASIC :** choisir un `.bas` ou un exemple, puis sur le Sharp **TEXT → Sio → Load** et sur le PC **Envoyer BASIC**. Après réception, retrouver le listing dans **TEXT → Edit**, le convertir avec **TEXT → Basic → Basic←text**, puis **BASIC / RUN MODE → RUN**. Le nom de fichier PC n’est pas transmis. Sauvegarder le BASIC existant avant la conversion, qui le remplace.
 
-**Assembleur :** choisir un `.bin` ou `.hex` dans le cadre Assembleur. Pour un BIN, respecter son adresse d’assemblage. Sur le Sharp, ouvrir **MON**, réserver la mémoire avec la commande `USER` indiquée par le programme, puis **R**. Cliquer sur **Envoyer ASM**, attendre la fin et exécuter `G` suivi de l’adresse d’entrée, par exemple `G100`. L’application affiche les commandes pour les exemples inclus ; suivre la documentation de chaque programme pour sa réservation. Le PC-G820 utilise un autre accès au moniteur, détaillé dans le manuel.
+**Assembleur :** choisir un `.ihx`, `.hex` ou `.bin` dans le cadre Assembleur. Les fichiers `.ihx` et `.hex` utilisent le même format Intel HEX et contiennent les adresses de chargement. Pour un BIN, respecter son adresse d’assemblage. Sur le Sharp, ouvrir **MON**, réserver la mémoire avec la commande `USER` indiquée par le programme, puis **R**. Cliquer sur **Envoyer ASM**, attendre la fin et exécuter `G` suivi de l’adresse d’entrée, par exemple `G100`. L’application affiche les commandes pour les exemples inclus ; suivre la documentation de chaque programme pour sa réservation. Le PC-G820 utilise un autre accès au moniteur, détaillé dans le manuel.
 
 Si `FRE` indique une quantité incohérente proche de 64 Ko sur un G801 de 8 Ko : sauvegarder les données, faire **RESET**, puis répondre **Y** à **MEMORY CLEAR O.K. ?**. Cette confirmation efface la mémoire. Revérifier ensuite `FRE` et les réglages SIO.
 
@@ -58,6 +60,7 @@ Le dumper automatique utilise les routines du firmware : son support matériel e
 
 ### Guides et contenu du dépôt
 
+- [Exemples PC-G850](examples/pc-g850/README.md#francais) — cinq listings BASIC FR/EN et deux programmes Z80 : transfert, écran, clavier, calcul/tableau et animation. Sélectionner un modèle G850 pour les retrouver dans les menus **Exemples**.
 - [Manuel de transfert et dépannage](docs/TRANSFER.md) — procédures détaillées, paramètres, réception, diagnostic CTS et exemples.
 - [Guide de sauvegarde ROM](romdump/AUTOMATIC.md) — modèles, reprise, fichiers et limites.
 - `examples/` : exemples BASIC et assembleur ; `sharp_link/` : application ; `romdump/` : agent et documentation.
@@ -104,9 +107,11 @@ First-run defaults: **1200 baud / 7N1**. For faster transfers use **Recommended:
 
 ### Load a program
 
+**G801 with a 32 KiB RAM expansion:** enable **32 KiB RAM expansion (G80X)** in the assembly settings. The preference is saved in the INI file. It permits programs beyond the stock 8 KiB model, with a USER ceiling of 77E2h; it does not change the Sharp’s memory. Check that the physical expansion is recognized by the firmware and that `FRE` covers the program. Leave it disabled on a stock G801. The selected ROM-backup model is unchanged.
+
 **BASIC:** select a `.bas` or an example. On Sharp choose **TEXT → Sio → Load**, then click **Send BASIC** on the PC. After reception, find the listing in **TEXT → Edit**, convert it using **TEXT → Basic → Basic←text**, then select **BASIC / RUN MODE → RUN**. The PC filename is not sent. Back up any existing BASIC program before conversion, which replaces it.
 
-**Assembly:** select a `.bin` or `.hex` in the Assembly section. For BIN files, use the original assembly address. On Sharp, enter **MON**, reserve memory using the program’s documented `USER` command, then enter **R**. Click **Send ASM**, wait for loading to finish, and run `G` followed by the entry address, such as `G100`. The application shows commands for its included examples; follow each program’s documentation for its reservation. PC-G820 uses a different monitor entry, described in the manual.
+**Assembly:** select an `.ihx`, `.hex` or `.bin` in the Assembly section. The `.ihx` and `.hex` extensions both use Intel HEX and include load addresses. For BIN files, use the original assembly address. On Sharp, enter **MON**, reserve memory using the program’s documented `USER` command, then enter **R**. Click **Send ASM**, wait for loading to finish, and run `G` followed by the entry address, such as `G100`. The application shows commands for its included examples; follow each program’s documentation for its reservation. PC-G820 uses a different monitor entry, described in the manual.
 
 If `FRE` reports an implausible value near 64 KB on an 8 KB G801: back up your data, press **RESET**, and answer **Y** to **MEMORY CLEAR O.K. ?**. This confirmation erases memory. Afterwards check `FRE` and the SIO settings again.
 
@@ -125,6 +130,7 @@ The automatic dumper uses firmware routines: hardware support is established for
 
 ### Guides and repository contents
 
+- [PC-G850 examples](examples/pc-g850/README.md#english) — five FR/EN BASIC listings and two Z80 programs: transfer, LCD, keyboard, calculation/array and animation. Select a G850 model to find them in the **Examples** menus.
 - [Transfer and troubleshooting manual](docs/TRANSFER_EN.md) — detailed procedures, framing, reception, CTS diagnostics and examples.
 - [ROM backup guide](romdump/AUTOMATIC_EN.md) — models, resuming, outputs and limits.
 - `examples/`: BASIC and assembly examples; `sharp_link/`: application; `romdump/`: agent and documentation.

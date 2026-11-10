@@ -14,6 +14,11 @@ MODELS = (
     "PC-G850V", "PC-G850VS",
 )
 SMALL_RAM_MODELS = {"PC-G801", "PC-G802", "PC-G803", "PC-G820"}
+G850_RAM_MODELS = {"PC-G850", "PC-G850S", "PC-G850V", "PC-G850VS"}
+# USER reservation ceiling with an empty user area (30,179 bytes).
+# The remaining physical RAM is needed by the firmware and its stack.
+G850_USER_MAX = 0x76E2
+G80X_EXPANDED_USER_MAX = 0x77E2
 MAX_FILE_BYTES = 256 * 1024
 EOF = b"\x1a"
 
@@ -32,6 +37,7 @@ class PreparedFile:
     start: int | None = None
     end: int | None = None
     data_bytes: int = 0
+    reserve_limit: int = 0x7FFF
 
     @property
     def wire(self) -> bytes:
@@ -44,7 +50,7 @@ class PreparedFile:
     @property
     def reserve_end(self) -> int:
         assert self.end is not None
-        return self.end | 0xFF
+        return min(self.end | 0xFF, self.reserve_limit)
 
 
 def read_source(path: Path) -> str:
@@ -120,7 +126,7 @@ def parse_hex(lines: list[str]) -> tuple[list[str], int, int, int]:
 
 
 def prepare(text: str, name: str = "programme.bas", mode: str = "auto",
-            model: str = "PC-G801", language: str = "fr") -> PreparedFile:
+            model: str = "PC-G801", language: str = "fr", expanded_ram: bool = False) -> PreparedFile:
     if len(text.encode("utf-8")) > MAX_FILE_BYTES:
         raise FormatError("file_large")
     lines = clean_lines(text)
@@ -138,10 +144,16 @@ def prepare(text: str, name: str = "programme.bas", mode: str = "auto",
     start = end = None
     count = 0
     notes: list[str] = []
+    reserve_limit = ((G80X_EXPANDED_USER_MAX if expanded_ram else 0x17E2) if model in SMALL_RAM_MODELS else
+                     G850_USER_MAX if model in G850_RAM_MODELS else 0x7FFF)
     if mode == "hex":
         lines, start, end, count = parse_hex(lines)
-        if model in SMALL_RAM_MODELS and end > 0x17E2:
+        if model in SMALL_RAM_MODELS and not expanded_ram and end > 0x17E2:
             raise FormatError("small_ram", end=end, model=model)
+        if model in SMALL_RAM_MODELS and expanded_ram and end > G80X_EXPANDED_USER_MAX:
+            raise FormatError("expanded_ram_range", end=end, model=model)
+        if model in G850_RAM_MODELS and end > G850_USER_MAX:
+            raise FormatError("g850_ram", end=end, model=model)
         notes.append(tr(language, "hex_note", count=count, start=start, end=end))
         if start != 0x0100:
             notes.append(tr(language, "entry_note"))
@@ -161,7 +173,7 @@ def prepare(text: str, name: str = "programme.bas", mode: str = "auto",
     wire_lines = tuple(line.encode("ascii") + b"\r\n" for line in lines)
     if model in SMALL_RAM_MODELS and mode != "hex" and sum(map(len, wire_lines)) > 5000:
         notes.append(tr(language, "large_text_note"))
-    return PreparedFile(name, mode, wire_lines, "\n".join(lines), " ".join(notes), start, end, count)
+    return PreparedFile(name, mode, wire_lines, "\n".join(lines), " ".join(notes), start, end, count, reserve_limit)
 
 
 def parse_address(value: str) -> int:
@@ -174,7 +186,7 @@ def parse_address(value: str) -> int:
 
 
 def prepare_binary(data: bytes, address: int, name: str = "programme.bin",
-                   model: str = "PC-G801", language: str = "fr") -> PreparedFile:
+                   model: str = "PC-G801", language: str = "fr", expanded_ram: bool = False) -> PreparedFile:
     """BIN is a host file format: MON R still receives a validated Intel HEX stream."""
     if not data:
         raise FormatError("file_empty")
@@ -182,7 +194,7 @@ def prepare_binary(data: bytes, address: int, name: str = "programme.bin",
         raise FormatError("binary_range")
     records = [intel_record(address + offset, data[offset:offset + 16]) for offset in range(0, len(data), 16)]
     records.append(":00000001FF")
-    prepared = prepare("\n".join(records), name, "hex", model, language)
+    prepared = prepare("\n".join(records), name, "hex", model, language, expanded_ram)
     dump = [f"{address + offset:04X}  " + " ".join(f"{byte:02X}" for byte in data[offset:offset + 16]).ljust(47)
             + "  |" + "".join(chr(byte) if 32 <= byte <= 126 else "." for byte in data[offset:offset + 16]) + "|"
             for offset in range(0, min(len(data), 20000), 16)]
@@ -192,7 +204,8 @@ def prepare_binary(data: bytes, address: int, name: str = "programme.bin",
 def instructions(program: PreparedFile, model: str) -> str:
     if program.kind in {"hex", "binary"}:
         # Reserve a whole page when possible; this is a recommendation, never sent as a command.
-        end = min(program.reserve_end, 0x17E2) if model in SMALL_RAM_MODELS else program.reserve_end
+        expanded = program.reserve_limit == G80X_EXPANDED_USER_MAX
+        end = min(program.reserve_end, 0x17E2) if model in SMALL_RAM_MODELS and not expanded else program.reserve_end
         mon = "CALL #5,&HC000" if model == "PC-G820" else "MON"
         return (
             "Sur le Sharp, avant l'envoi\n\n"

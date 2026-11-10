@@ -27,3 +27,12 @@ Outputs go to `dist/` and to `deliverables/` beside the repository. The build em
 `tools/setup/` retains console recovery scripts for broken `.pyw` associations. `tools/legacy/` holds older entry points; new users do not need them. The root launcher offers graphical dependency setup when needed.
 
 See the [ROM guide](../romdump/AUTOMATIC_EN.md) to rebuild or test the Z80 code. The supplied agent binaries are sufficient for normal use.
+
+The [PC-G850 examples](../examples/pc-g850/README.md#english) are preassembled. To rebuild their two Z80 programs and check them using `z80==1.2.0`:
+
+```text
+python tools/build_g850_examples.py --assembler "path/to/sjasmplus.exe" --lang en
+python tests/check_g850_examples.py --lang en
+```
+
+Checks cover returns, writes inside the USER reservation and all six graphic bands, using simulated IOCS. No Sharp ROM is required.

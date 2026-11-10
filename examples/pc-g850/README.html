@@ -1,0 +1,87 @@
+<!doctype html><html lang="fr"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharp PC-G Link</title><style>
+body{background:#edf1f5;color:#23364a;font:17px/1.6 'Segoe UI',sans-serif;margin:0}
+main{max-width:940px;margin:30px auto;background:white;padding:32px 50px;border-radius:12px}
+h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.8em}
+h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
+pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
+pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+table{border-collapse:collapse;width:100%;font-size:.92em}th,td{border:1px solid #d6dfe6;padding:8px 10px;text-align:left;vertical-align:top}th{background:#edf1f5}
+</style><main><h1>Exemples PC-G850 / PC-G850 examples</h1>
+<p><a href="#francais">Français</a> · <a href="#english">English</a></p>
+<a id="francais"></a>
+<h2>Français</h2>
+<p>Ces exemples ciblent les <strong>PC-G850, G850S, G850V et G850VS</strong>, avec un affichage de <strong>24 caractères × 6 lignes</strong>, soit <strong>144 × 48 pixels</strong>. Ils servent à vérifier le transfert et à observer l’affichage, la saisie et l’exécution de petits programmes. Le tableau BASIC vérifie ses variables allouées ; ce n’est pas un contrôle exhaustif de la RAM.</p>
+<p>Sélectionner le modèle dans Sharp PC-G Link : les boutons <strong>Exemples</strong> des cadres BASIC et Assembleur proposent alors les entrées <strong>G850</strong>. Les listings chargés suivent la langue choisie dans l’application. Les fichiers peuvent aussi être ouverts avec <strong>Parcourir</strong>.</p>
+<h3>Réglages et chargement BASIC</h3>
+<p>Sauvegarder les données à conserver. Choisir les mêmes paramètres sur le PC et dans <strong>TEXT → Sio → Format</strong> sur le Sharp : <strong>4800 bauds / 8N1, RS/CS, CR LF, EOF 1A</strong>, puis ENTER. Activer <strong>Line number = Yes</strong> pour conserver les numéros du listing. Le bouton des réglages conseillés configure uniquement le PC.</p>
+<ol>
+<li>Ouvrir un exemple de <code>basic/fr/</code> ou le choisir dans <strong>Exemples</strong>.</li>
+<li>Sur le Sharp, préparer une zone TEXT vide, puis <strong>TEXT → Sio → Load</strong>.</li>
+<li>Sur le PC, cliquer <strong>Envoyer BASIC</strong> et attendre la fin sur le Sharp.</li>
+<li>Consulter le listing dans <strong>TEXT → Edit</strong>, puis convertir avec <strong>TEXT → Basic → Basic←text</strong>. La conversion remplace le BASIC présent.</li>
+<li>En mode BASIC RUN, saisir <strong>RUN</strong>. Le nom du fichier PC n’est pas transmis.</li>
+</ol>
+<table>
+<tr><th>Fichier</th><th>Fonctionnement</th></tr>
+<tr><td><a href="basic/fr/01_transfer.bas">01_transfer.bas</a></td><td>Message sur les six lignes ; une touche termine le programme.</td></tr>
+<tr><td><a href="basic/fr/02_lcd.bas">02_lcd.bas</a></td><td>Quatre pages : grille sur toute la surface, damier au pixel, écran plein et écran vide. Une touche passe à la page suivante. Le damier se dessine progressivement.</td></tr>
+<tr><td><a href="basic/fr/03_keyboard.bas">03_keyboard.bas</a></td><td>Affiche le caractère imprimable, son code et le nombre de pressions. Relâcher la touche entre deux pressions. <strong>Q</strong> quitte ; <strong>BREAK</strong> interrompt le BASIC.</td></tr>
+<tr><td><a href="basic/fr/04_calculation.bas">04_calculation.bas</a></td><td>Stocke et relit les carrés de 0 à 99 dans un tableau de 100 valeurs. La somme attendue est <strong>328350</strong>. Une touche termine le programme.</td></tr>
+<tr><td><a href="basic/fr/05_animation.bas">05_animation.bas</a></td><td>Carré rebondissant dans une fenêtre graphique ; <strong>Q</strong> quitte.</td></tr>
+</table>
+<p>Le lecteur BASIC utilise <strong>INKEY$</strong>, donc les caractères et codes exposés par le firmware. Les touches de mode et combinaisons réservées ne constituent pas une matrice clavier brute. La mire aide à repérer des lignes ou colonnes manquantes ; elle ne détermine pas la cause d’un défaut matériel. Les programmes restaurent le mode WAIT par défaut en terminant normalement.</p>
+<h3>Exemples Z80 prêts à envoyer</h3>
+<p>Les fichiers BIN et HEX représentent le même programme. Origine et entrée : <strong>0100h</strong>. Dans le cadre Assembleur, choisir le fichier puis <strong>Envoyer ASM</strong> après avoir préparé le Sharp avec les commandes ci-dessous, ENTER après chacune. Les commandes <code>USER</code> réservent aussi les zones de travail.</p>
+<table>
+<tr><th>Exemple</th><th>Préparation</th><th>Après transfert</th></tr>
+<tr><td><a href="assembler/g850_signature.hex">Signature G850 — HEX</a> / <a href="assembler/g850_signature.bin">BIN</a></td><td><code>MON</code> → <code>USER01FF</code> → <code>R</code></td><td><code>G100</code>, puis <code>D180</code> : les quatre premiers octets doivent être <strong>47 38 35 30</strong>, soit <strong>G850</strong> en ASCII.</td></tr>
+<tr><td><a href="assembler/g850_lcd.hex">Mire LCD Z80 — HEX</a> / <a href="assembler/g850_lcd.bin">BIN</a></td><td><code>MON</code> → <code>USER02FF</code> → <code>R</code></td><td><code>G100</code> affiche six bandes de huit pixels de haut. Appuyer sur une touche pour revenir au moniteur.</td></tr>
+</table>
+<p>La signature n’appelle aucune routine ROM et n’accède à aucun port. Elle écrit quatre octets en <strong>0180h–0183h</strong>, dans sa réservation. La mire utilise les IOCS <strong>BFD0h</strong> (144 colonnes de pixels sur chacune des six lignes) et <strong>BCFDh</strong> (attente clavier), avec un tampon en <strong>0200h–028Fh</strong>. Les motifs des bandes sont <strong>FF, 00, AA, 55, F0, 0F</strong> ; la deuxième bande est volontairement vide. Une touche ramène au moniteur ; une routine IOCS incompatible avec le firmware nécessite une adaptation.</p>
+<p>Les sources commentés sont fournis. Pour les reconstruire, installer SjASMPlus et lancer depuis la racine :</p>
+<pre><code>
+python tools/build_g850_examples.py --assembler &quot;chemin/vers/sjasmplus.exe&quot; --lang fr
+
+</code></pre>
+<p>Les adresses, tailles et SHA-256 figurent dans <a href="assembler/manifest.json">assembler/manifest.json</a>. Aucun changement de banque, de contraste ou d’EEPROM FTDI n’est effectué par ces exemples.</p>
+<p><a href="../../docs/README.html#francais">Application et dépannage</a> · <a href="https://ver0.sakura.ne.jp/pc/">Référence g800 : sources et IOCS</a> · <a href="https://www.akiyan.com/pc-g850_technical_data">Analyse du PC-G850</a></p>
+<p>---</p>
+<a id="english"></a>
+<h2>English</h2>
+<p>These examples target <strong>PC-G850, G850S, G850V and G850VS</strong>, with <strong>24 characters × 6 rows</strong>, or <strong>144 × 48 pixels</strong>. They help check transfers and observe display, keyboard and small-program execution. The BASIC array checks its allocated variables; it is not an exhaustive RAM test.</p>
+<p>Select the model in Sharp PC-G Link: the BASIC and Assembly <strong>Examples</strong> buttons then offer <strong>G850</strong> entries. Loaded listings follow the application language. You can also open the files with <strong>Browse</strong>.</p>
+<h3>Serial settings and BASIC loading</h3>
+<p>Back up data you want to keep. Match PC settings with Sharp <strong>TEXT → Sio → Format</strong>: <strong>4800 baud / 8N1, RS/CS, CR LF, EOF 1A</strong>, then ENTER. Enable <strong>Line number = Yes</strong> to preserve listing numbers. The recommended-settings button configures the PC only.</p>
+<ol>
+<li>Open an example under <code>basic/en/</code> or choose it from <strong>Examples</strong>.</li>
+<li>On the Sharp, prepare an empty TEXT area, then <strong>TEXT → Sio → Load</strong>.</li>
+<li>On the PC, click <strong>Send BASIC</strong> and wait for reception to finish on the Sharp.</li>
+<li>Inspect the listing in <strong>TEXT → Edit</strong>, then convert with <strong>TEXT → Basic → Basic←text</strong>. Conversion replaces the current BASIC program.</li>
+<li>In BASIC RUN mode, type <strong>RUN</strong>. The PC filename is not transmitted.</li>
+</ol>
+<table>
+<tr><th>File</th><th>Behaviour</th></tr>
+<tr><td><a href="basic/en/01_transfer.bas">01_transfer.bas</a></td><td>Message across all six rows; any key ends the program.</td></tr>
+<tr><td><a href="basic/en/02_lcd.bas">02_lcd.bas</a></td><td>Four pages: full-screen grid, pixel checkerboard, solid screen and blank screen. Press a key for the next page. The checkerboard draws progressively.</td></tr>
+<tr><td><a href="basic/en/03_keyboard.bas">03_keyboard.bas</a></td><td>Displays printable characters, key codes and press count. Release the key between presses. <strong>Q</strong> quits; <strong>BREAK</strong> interrupts BASIC.</td></tr>
+<tr><td><a href="basic/en/04_calculation.bas">04_calculation.bas</a></td><td>Stores and rereads squares from 0 to 99 in a 100-element array. Expected sum: <strong>328350</strong>. Any key ends the program.</td></tr>
+<tr><td><a href="basic/en/05_animation.bas">05_animation.bas</a></td><td>Bouncing square in a graphics window; <strong>Q</strong> quits.</td></tr>
+</table>
+<p>The BASIC key reader uses <strong>INKEY$</strong>, exposing firmware characters and codes. Mode keys and reserved combinations do not provide a raw keyboard matrix scan. LCD patterns help reveal missing rows or columns; they do not identify the cause of a hardware fault. Programs restore default WAIT mode when ending normally.</p>
+<h3>Ready-to-send Z80 examples</h3>
+<p>BIN and HEX files contain the same program. Origin and entry: <strong>0100h</strong>. In the Assembly section, select a file and use <strong>Send ASM</strong> after preparing the Sharp with the commands below, ENTER after each. <code>USER</code> reservations also cover working memory.</p>
+<table>
+<tr><th>Example</th><th>Preparation</th><th>After transfer</th></tr>
+<tr><td><a href="assembler/g850_signature.hex">G850 signature — HEX</a> / <a href="assembler/g850_signature.bin">BIN</a></td><td><code>MON</code> → <code>USER01FF</code> → <code>R</code></td><td><code>G100</code>, then <code>D180</code>: the first four bytes should be <strong>47 38 35 30</strong>, ASCII <strong>G850</strong>.</td></tr>
+<tr><td><a href="assembler/g850_lcd.hex">Z80 LCD patterns — HEX</a> / <a href="assembler/g850_lcd.bin">BIN</a></td><td><code>MON</code> → <code>USER02FF</code> → <code>R</code></td><td><code>G100</code> draws six eight-pixel bands. Press a key to return to the monitor.</td></tr>
+</table>
+<p>The signature makes no ROM calls or port accesses. It writes four bytes at <strong>0180h–0183h</strong>, inside its reservation. The LCD program uses IOCS <strong>BFD0h</strong> (144 pixel columns on each of six rows) and <strong>BCFDh</strong> (wait for key), with a buffer at <strong>0200h–028Fh</strong>. Band patterns are <strong>FF, 00, AA, 55, F0, 0F</strong>; the second band is deliberately blank. A key returns to the monitor; firmware with incompatible IOCS routines requires adaptation.</p>
+<p>Commented assembly sources are included. To rebuild them, install SjASMPlus and run from the project root:</p>
+<pre><code>
+python tools/build_g850_examples.py --assembler &quot;path/to/sjasmplus.exe&quot; --lang en
+
+</code></pre>
+<p>Addresses, sizes and SHA-256 hashes are recorded in <a href="assembler/manifest.json">assembler/manifest.json</a>. These examples do not change banking, contrast or FTDI EEPROM configuration.</p>
+<p><a href="../../docs/README.html#english">Application and troubleshooting</a> · <a href="https://ver0.sakura.ne.jp/pc/">g800 source and IOCS reference</a> · <a href="https://www.akiyan.com/pc-g850_technical_data">PC-G850 analysis</a></p></main></html>

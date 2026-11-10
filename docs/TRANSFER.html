@@ -7,6 +7,7 @@ h1{color:#142c40;font-size:2.4em;line-height:1.15}h2{color:#176d8a;margin-top:1.
 h3{margin-top:1.7em}a{color:#146787}code{background:#edf1f5;padding:2px 5px;border-radius:3px}
 pre{background:#142c40;color:#e7f3fa;padding:18px 22px;border-radius:8px;overflow:auto;line-height:1.1}
 pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){main{padding:20px;margin:0;border-radius:0}}
+table{border-collapse:collapse;width:100%;font-size:.92em}th,td{border:1px solid #d6dfe6;padding:8px 10px;text-align:left;vertical-align:top}th{background:#edf1f5}
 </style><main><h1>Manuel de transfert</h1>
 <p><a href="TRANSFER_EN.html">English</a> · <a href="README.html#francais">Accueil</a></p>
 <h2>Préparer la liaison</h2>
@@ -30,7 +31,8 @@ pre code{background:none;padding:0}li{margin:.45em 0}@media(max-width:700px){mai
 <p><strong>BIN :</strong> saisir l’adresse d’origine utilisée à l’assemblage. Les octets sont convertis automatiquement en Intel HEX. <strong>HEX/IHX :</strong> les adresses proviennent du fichier ; le champ de chargement BIN est désactivé. Checksums, longueurs, recouvrements et limites sont contrôlés. Seuls les enregistrements 00 (données) et 01 (fin) sont acceptés.</p>
 <p>Les adresses sont hexadécimales : <code>0100</code>, <code>0x0100</code> et <code>&amp;H0100</code> sont acceptés. <strong>Changer l’adresse de chargement ne reloge pas le code.</strong> Le champ <strong>Entrée</strong> sert uniquement à afficher la commande <code>G</code> ; il ne lance pas le programme.</p>
 <p>Après sauvegarde du contenu utile : <strong>MON → USERxxxx → R</strong> sur le Sharp, puis <strong>Envoyer ASM</strong> sur le PC. Une fois le transfert terminé, saisir <strong>Gxxxx</strong> avec le point d’entrée documenté. Sur PC-G820, utiliser <strong>CALL #5,&amp;HC000</strong> pour entrer dans le moniteur.</p>
-<p>La suggestion USER couvre le fichier jusqu’à la fin de page ; prévoir aussi la RAM nécessaire aux variables et à la pile du programme. Les adresses acceptées sont 0100–7FFFh, limitées à 0100–17E2h sur les profils 8 Kio G801/G802/G803/G820. Ce contrôle ne mesure pas la RAM libre sur l’appareil. Un source <code>.asm</code> doit être assemblé avant envoi.</p>
+<p>La suggestion USER couvre le fichier jusqu’à la fin de page, dans la limite du profil choisi ; prévoir aussi la RAM nécessaire aux variables et à la pile du programme. La plage générale est 0100–7FFFh, limitée à 0100–17E2h sur les profils 8 Kio G801/G802/G803/G820 et à <strong>0100–76E2h sur G850/G850S/G850V/G850VS</strong>. Ces derniers disposent d’environ <strong>30 179 octets utilisateur</strong> à vide : les 32 Kio physiques ne sont pas entièrement disponibles pour USER. Voir la <a href="https://pockemul.com/wp-content/uploads/2020/05/PC-G850VSEng_V3_0.pdf">documentation G850V(S), chapitre 10 et annexes D/I</a>. Ce contrôle ne mesure pas la RAM libre sur l’appareil. Un source <code>.asm</code> doit être assemblé avant envoi.</p>
+<p><strong>MEMORY ERROR après USER :</strong> vérifier la taille requise et la place disponible avec <code>FRE</code>. Si <code>USER</code> affiche déjà « NOT RESERVED » et que la mémoire est libre, une réservation trop grande exige un programme plus petit. Ne pas réduire simplement la réservation puis charger un fichier qui la dépasse.</p>
 <h3>Exemple autonome inclus</h3>
 <p>Choisir <strong>Signature PC-G801 (.bin)</strong> ou <strong>(.hex)</strong>. Les deux fichiers représentent le même programme de 16 octets, d’origine et d’entrée <strong>0100h</strong>, sans appel ROM ni accès matériel.</p>
 <pre><code>

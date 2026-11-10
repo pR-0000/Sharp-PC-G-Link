@@ -8,6 +8,14 @@ from sharp_link.config import DEFAULTS, load_settings, save_settings
 
 
 class ConfigTests(unittest.TestCase):
+    def test_expanded_ram_defaults_off_and_roundtrips(self):
+        self.assertEqual(load_settings(self.path)['expanded_ram'],'no')
+        values=dict(DEFAULTS,expanded_ram='yes')
+        save_settings(self.path,values)
+        self.assertEqual(load_settings(self.path)['expanded_ram'],'yes')
+        self.path.write_text('[assembler]\nexpanded_ram = invalid\n',encoding='utf-8')
+        self.assertEqual(load_settings(self.path)['expanded_ram'],'no')
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.path = Path(self.temp.name) / "sharp_pc_g_link.ini"

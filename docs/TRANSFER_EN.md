@@ -35,7 +35,9 @@ Addresses are hexadecimal: `0100`, `0x0100` and `&H0100` are accepted. **Changin
 
 After backing up useful data: **MON → USERxxxx → R** on the Sharp, then **Send ASM** on the PC. Once loading finishes, enter **Gxxxx** with the documented entry point. On PC-G820, use **CALL #5,&HC000** to enter the monitor.
 
-The USER suggestion covers the file through the end of its page; also allow RAM for variables and the stack. Accepted addresses are 0100–7FFFh, limited to 0100–17E2h for 8 KiB G801/G802/G803/G820 profiles. This check does not measure free RAM on the device. Assemble `.asm` sources before sending them.
+The USER suggestion covers the file through the end of its page, within the selected profile's limit; also allow RAM for variables and the stack. The general range is 0100–7FFFh, limited to 0100–17E2h for 8 KiB G801/G802/G803/G820 profiles and to **0100–76E2h on G850/G850S/G850V/G850VS**. These models provide about **30,179 user bytes** with an empty user area: not all 32 KiB of physical RAM is available to USER. See the [G850V(S) documentation, chapter 10 and appendices D/I](https://pockemul.com/wp-content/uploads/2020/05/PC-G850VSEng_V3_0.pdf). This check does not measure free RAM on the device. Assemble `.asm` sources before sending them.
+
+**MEMORY ERROR after USER:** check the required size and available space with `FRE`. If `USER` already reports “NOT RESERVED” and memory is free, an oversized reservation requires a smaller program. Do not simply reduce the reservation and then load a file that exceeds it.
 
 ### Included standalone example
 

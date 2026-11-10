@@ -63,11 +63,15 @@ class PublicationTests(unittest.TestCase):
             (root/'romdump').mkdir()
             (root/'README.md').write_text(
                 '[English](#english)\n\n<a id="english"></a>\n\n## English\n\n'
-                '[Guide](docs/GUIDE_EN.md)\n', encoding='utf-8')
+                '[Guide](docs/GUIDE_EN.md)\n\n| File | Use |\n|---|---|\n| `demo.bas` | Transfer |\n', encoding='utf-8')
             (root/'NOTICE.md').write_text('# Notices\n', encoding='utf-8')
             (root/'docs/GUIDE_EN.md').write_text('[Home](../README.md#english)\n', encoding='utf-8')
             render_all(root)
             manual = Links((root/'docs/README.html').read_text(encoding='utf-8'))
+            html = (root/'docs/README.html').read_text(encoding='utf-8')
+            self.assertIn('<table>', html)
+            self.assertIn('<th>File</th>', html)
+            self.assertIn('<td><code>demo.bas</code></td>', html)
             self.assertIn('english', manual.anchors)
             self.assertIn('#english', manual.links)
             self.assertIn('GUIDE_EN.html', manual.links)
